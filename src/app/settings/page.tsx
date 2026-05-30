@@ -47,9 +47,8 @@ export default function SettingsPage() {
   }
 
   const roleLabels: Record<string, string> = {
-    founder: "Founder",
+    builder: "Builder",
     startup: "Startup",
-    corporate: "Corporate",
   };
 
   return (

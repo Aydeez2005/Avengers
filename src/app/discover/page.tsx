@@ -19,19 +19,17 @@ export type EventData = {
   attendees: number;
 };
 
-type RoleKey = "founder" | "startup" | "corporate";
+type RoleKey = "builder" | "startup";
 type Tab = "Co-founders" | "Events" | "Projects" | "Find Talent";
 
 const ROLE_TABS: Record<RoleKey, Tab[]> = {
-  founder:   ["Co-founders", "Projects", "Events"],
-  startup:   ["Find Talent", "Events"],
-  corporate: ["Find Talent", "Events"],
+  builder: ["Co-founders", "Projects", "Events"],
+  startup: ["Find Talent", "Events"],
 };
 
 const ROLE_LABELS: Record<RoleKey, string> = {
-  founder:   "Founder",
-  startup:   "Startup",
-  corporate: "Corporate",
+  builder: "Builder",
+  startup: "Startup",
 };
 
 // ── Mock data ──────────────────────────────────────────────────────────────
@@ -239,7 +237,7 @@ function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolea
 export default function DiscoverPage() {
   const [role, setRole] = useState<RoleKey | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [viewingAs, setViewingAs] = useState<RoleKey>("founder");
+  const [viewingAs, setViewingAs] = useState<RoleKey>("builder");
   const [activeTab, setActiveTab] = useState<Tab>("Co-founders");
   const [cardStacks, setCardStacks] = useState<Record<Tab, CardData[]>>({
     "Co-founders": COFOUNDERS,
@@ -263,14 +261,14 @@ export default function DiscoverPage() {
       const userRole = meta.role as string;
       if (userRole === "admin") {
         setIsAdmin(true);
-        setViewingAs("founder");
+        setViewingAs("builder");
       } else {
-        setRole((userRole as RoleKey) ?? "founder");
+        setRole((userRole as RoleKey) ?? "builder");
       }
     });
   }, []);
 
-  const effectiveRole: RoleKey = isAdmin ? viewingAs : (role ?? "founder");
+  const effectiveRole: RoleKey = isAdmin ? viewingAs : (role ?? "builder");
   const tabs = ROLE_TABS[effectiveRole];
 
   // Reset to first tab when effective role changes

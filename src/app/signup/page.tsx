@@ -6,10 +6,10 @@ import { supabase } from "@/lib/supabase";
 
 const ROLES = [
   {
-    id: "founder",
-    icon: "🧭",
-    title: "Founder",
-    desc: "You have a vision — find a co-founder, join or post projects, and connect at events.",
+    id: "builder",
+    icon: "🛠️",
+    title: "Builder",
+    desc: "Find a co-founder, join or post projects, and connect at events.",
     features: ["Co-founder matching", "Projects", "Events"],
   },
   {
@@ -17,13 +17,6 @@ const ROLES = [
     icon: "🚀",
     title: "Startup",
     desc: "Post projects, hire talent, and find participants for your events.",
-    features: ["Post projects", "Find talent", "Event recruiting"],
-  },
-  {
-    id: "corporate",
-    icon: "🏢",
-    title: "Corporate",
-    desc: "Source innovation, post projects, and connect with the startup ecosystem.",
     features: ["Post projects", "Find talent", "Event recruiting"],
   },
 ];
