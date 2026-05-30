@@ -259,6 +259,18 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
   const [budget, setBudget] = useState("");
   const [people, setPeople] = useState("");
   const [website, setWebsite] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
+    setLoading(true);
+    await fetch("/api/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, description, deadline, budget, people, website }),
+    });
+    setLoading(false);
+    onDone();
+  }
 
   return (
     <div className="flex flex-col gap-3 pb-6">
@@ -292,9 +304,9 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
       </div>
 
       <div className="h-px bg-white/6 my-2" />
-      <button onClick={onDone} disabled={!name || !description || !deadline || !budget || !people}
+      <button onClick={handleSubmit} disabled={!name || !description || !deadline || !budget || !people || loading}
         className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
-        Post project →
+        {loading ? "Posting…" : "Post project →"}
       </button>
       <button onClick={onDone} className="text-center text-sm text-white/30 hover:text-white/60 transition-colors">Cancel</button>
     </div>
@@ -308,6 +320,18 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
   const [topic, setTopic] = useState("");
   const [showLuma, setShowLuma] = useState(false);
   const [lumaUrl, setLumaUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit() {
+    setLoading(true);
+    await fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, location, date, topic, luma_url: lumaUrl || null }),
+    });
+    setLoading(false);
+    onDone();
+  }
 
   return (
     <div className="flex flex-col gap-3 pb-6">
@@ -348,9 +372,9 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
       </div>
 
       <div className="h-px bg-white/6 my-2" />
-      <button onClick={onDone} disabled={!name || !location || !date || !topic}
+      <button onClick={handleSubmit} disabled={!name || !location || !date || !topic || loading}
         className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
-        Create event →
+        {loading ? "Creating…" : "Create event →"}
       </button>
       <button onClick={onDone} className="text-center text-sm text-white/30 hover:text-white/60 transition-colors">Cancel</button>
     </div>
@@ -360,7 +384,7 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
 // ── Main page ──────────────────────────────────────────────────────────────
 
 type RoleKey = "builder" | "business";
-type BuilderTab = "Co-founders" | "Events";
+type BuilderTab = "Co-founders" | "Projects" | "Events";
 type BusinessView = "home" | "post-project" | "create-event";
 
 export default function DiscoverPage() {
@@ -447,7 +471,7 @@ export default function DiscoverPage() {
         <>
           {/* Tabs */}
           <div className="flex gap-2 px-5 pb-2 overflow-x-auto no-scrollbar">
-            {(["Co-founders", "Events"] as BuilderTab[]).map((tab) => (
+            {(["Co-founders", "Projects", "Events"] as BuilderTab[]).map((tab) => (
               <button key={tab} onClick={() => setBuilderTab(tab)}
                 className={`flex-shrink-0 text-[11px] tracking-[0.15em] uppercase px-3.5 py-1.5 rounded-full border transition-colors ${builderTab === tab ? "border-white/60 text-white bg-white/10" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"}`}>
                 {tab}
@@ -481,6 +505,12 @@ export default function DiscoverPage() {
                   </div>
                 )}
               </>
+            )}
+
+            {builderTab === "Projects" && (
+              <div className="flex flex-col gap-4 pb-4">
+                {MOCK_PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
+              </div>
             )}
 
             {builderTab === "Events" && (
