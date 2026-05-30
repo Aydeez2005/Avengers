@@ -258,6 +258,7 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
   const [deadline, setDeadline] = useState("");
   const [budget, setBudget] = useState("");
   const [people, setPeople] = useState("");
+  const [website, setWebsite] = useState("");
 
   return (
     <div className="flex flex-col gap-3 pb-6">
@@ -266,12 +267,18 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
       {[
         { placeholder: "Project name", value: name, set: setName },
         { placeholder: "Short description", value: description, set: setDescription },
-        { placeholder: "Budget (e.g. €2,000)", value: budget, set: setBudget },
         { placeholder: "People required (e.g. 2)", value: people, set: setPeople },
       ].map(({ placeholder, value, set }) => (
         <input key={placeholder} type="text" placeholder={placeholder} value={value} onChange={(e) => set(e.target.value)}
           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
       ))}
+      <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden focus-within:border-white/40 transition-colors">
+        <span className="px-4 text-sm text-white/50 border-r border-white/10 py-[14px]">€</span>
+        <input type="number" min="0" placeholder="Budget" value={budget} onChange={(e) => setBudget(e.target.value)}
+          className="flex-1 bg-transparent px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none" />
+      </div>
+      <input type="url" placeholder="Website / challenge link (optional)" value={website} onChange={(e) => setWebsite(e.target.value)}
+        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
       <div className="flex flex-col gap-1">
         <label className="text-[10px] tracking-[0.2em] uppercase text-white/35 px-1">Deadline</label>
         <input
