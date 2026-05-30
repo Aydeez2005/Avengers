@@ -13,8 +13,9 @@ const CATEGORIES = [
   { id: "biotech",   label: "Biotech" },
   { id: "hardware",  label: "Hardware" },
   { id: "edtech",    label: "EdTech" },
-  { id: "web3",      label: "Web3" },
-  { id: "other",     label: "Other" },
+  { id: "web3",          label: "Web3" },
+  { id: "sustainability", label: "Sustainability" },
+  { id: "other",         label: "Other" },
 ];
 
 type Role = "builder" | "business";
