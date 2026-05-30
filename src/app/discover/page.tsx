@@ -790,8 +790,10 @@ export default function DiscoverPage() {
     setTimeout(() => setLastAction(null), 800);
   }
 
+  const isScrollTab = effectiveRole === "builder" && builderTab !== "Co-founders";
+
   return (
-    <main className="h-[100dvh] bg-[#0a0a0a] flex flex-col overflow-hidden pb-[72px]">
+    <main className={`${isScrollTab ? "min-h-[100dvh]" : "h-[100dvh] overflow-hidden"} bg-[#0a0a0a] flex flex-col pb-[72px]`}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 pt-4 pb-1">
         <span className="text-xs font-bold tracking-[0.25em] uppercase text-white/90">Scout</span>
@@ -832,7 +834,7 @@ export default function DiscoverPage() {
             <div className="mx-6 mb-3 bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-2.5 text-sm text-green-400 text-center animate-pulse">✓ Connected!</div>
           )}
 
-          <div className="flex-1 flex flex-col px-5 pt-1 overflow-hidden">
+          <div className={`px-5 pt-1 ${isScrollTab ? "pb-4" : "flex-1 flex flex-col overflow-hidden"}`}>
             {builderTab === "Co-founders" && (
               <div className="flex flex-col h-full">
                 <FilterBar hasIdea={ideaFilter} setHasIdea={setIdeaFilter} category={categoryFilter} setCategory={setCategoryFilter} />
@@ -861,8 +863,7 @@ export default function DiscoverPage() {
             )}
 
             {builderTab === "Projects" && (
-              <div className="flex-1 min-h-0 overflow-y-auto">
-              <div className="flex flex-col gap-4 pb-4">
+              <div className="flex flex-col gap-4 pt-1">
                 {(dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS).map((p) => (
                   <ProjectCard key={p.id} project={p}
                     applied={appliedProjects.has(String(p.id))}
@@ -879,12 +880,10 @@ export default function DiscoverPage() {
                   />
                 ))}
               </div>
-              </div>
             )}
 
             {builderTab === "Events" && (
-              <div className="flex-1 min-h-0 overflow-y-auto">
-              <div className="flex flex-col gap-4 pb-4">
+              <div className="flex flex-col gap-4 pt-1">
                 {(dbEvents.length > 0 ? dbEvents : EVENTS).map((event) => (
                   <EventCard key={event.id} event={event} joined={joinedEvents.has(String(event.id))}
                     onJoin={async () => {
@@ -901,7 +900,6 @@ export default function DiscoverPage() {
                       setJoinedEvents((prev) => new Set([...prev, id]));
                     }} />
                 ))}
-              </div>
               </div>
             )}
           </div>
