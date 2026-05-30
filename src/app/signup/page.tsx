@@ -17,7 +17,7 @@ const ROLES = [
     icon: "🛠️",
     title: "Builder",
     desc: "You have skills and drive — find a co-founder, join a project, or land a role.",
-    features: ["Co-founder matching", "Join projects", "Job search", "Events"],
+    features: ["Co-founder matching", "Join projects", "Events"],
   },
   {
     id: "researcher",
@@ -31,14 +31,14 @@ const ROLES = [
     icon: "🚀",
     title: "Startup",
     desc: "Post projects, hire talent, and find participants for your events.",
-    features: ["Post projects", "Post jobs", "Find talent", "Event recruiting"],
+    features: ["Post projects", "Find talent", "Event recruiting"],
   },
   {
     id: "corporate",
     icon: "🏢",
     title: "Corporate",
     desc: "Source innovation, post projects, and connect with the startup ecosystem.",
-    features: ["Post projects", "Post jobs", "Find talent", "Event recruiting"],
+    features: ["Post projects", "Find talent", "Event recruiting"],
   },
 ];
 

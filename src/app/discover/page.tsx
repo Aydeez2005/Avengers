@@ -20,11 +20,11 @@ export type EventData = {
 };
 
 type RoleKey = "founder" | "builder" | "researcher" | "startup" | "corporate";
-type Tab = "Co-founders" | "Events" | "Projects" | "Jobs" | "Find Talent";
+type Tab = "Co-founders" | "Events" | "Projects" | "Find Talent";
 
 const ROLE_TABS: Record<RoleKey, Tab[]> = {
   founder:    ["Co-founders", "Events"],
-  builder:    ["Co-founders", "Projects", "Jobs", "Events"],
+  builder:    ["Co-founders", "Projects", "Events"],
   researcher: ["Co-founders", "Events"],
   startup:    ["Find Talent", "Events"],
   corporate:  ["Find Talent", "Events"],
@@ -116,36 +116,6 @@ const PROJECTS: CardData[] = [
   },
 ];
 
-const JOBS: CardData[] = [
-  {
-    id: 301,
-    type: "Startup",
-    name: "Volara",
-    tagline: "Next-gen mobility data platform for European cities",
-    location: "Berlin",
-    tags: ["Mobility", "SaaS", "Enterprise"],
-    lookingFor: "Senior Backend Engineer (Go / Rust)",
-    meta: [
-      { label: "Stage", value: "Series A" },
-      { label: "Team", value: "18 people" },
-      { label: "Salary", value: "€90–110k" },
-    ],
-  },
-  {
-    id: 302,
-    type: "Startup",
-    name: "Clausify",
-    tagline: "AI that reads contracts so lawyers don't have to",
-    location: "Berlin",
-    tags: ["AI / ML", "LegalTech", "B2B SaaS"],
-    lookingFor: "Full-stack Engineer — founding team",
-    meta: [
-      { label: "Stage", value: "Pre-seed" },
-      { label: "Equity", value: "0.5–2%" },
-      { label: "Salary", value: "€60–80k" },
-    ],
-  },
-];
 
 const TALENT: CardData[] = [
   {
@@ -217,7 +187,6 @@ const EVENTS: EventData[] = [
 const CARDS_BY_TAB: Partial<Record<Tab, CardData[]>> = {
   "Co-founders": COFOUNDERS,
   "Projects":    PROJECTS,
-  "Jobs":        JOBS,
   "Find Talent": TALENT,
 };
 
@@ -279,12 +248,11 @@ export default function DiscoverPage() {
   const [cardStacks, setCardStacks] = useState<Record<Tab, CardData[]>>({
     "Co-founders": COFOUNDERS,
     "Projects":    PROJECTS,
-    "Jobs":        JOBS,
     "Find Talent": TALENT,
     "Events":      [],
   });
   const [connectCounts, setConnectCounts] = useState<Record<Tab, number>>({
-    "Co-founders": 0, "Projects": 0, "Jobs": 0, "Find Talent": 0, "Events": 0,
+    "Co-founders": 0, "Projects": 0, "Find Talent": 0, "Events": 0,
   });
   const [joinedEvents, setJoinedEvents] = useState<Set<number>>(new Set());
   const [lastAction, setLastAction] = useState<"pass" | "connect" | null>(null);
