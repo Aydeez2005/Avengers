@@ -6,38 +6,45 @@ import { supabase } from "@/lib/supabase";
 
 const ROLES = [
   {
-    id: "cofounder",
-    icon: "🤝",
-    title: "Co-founder",
-    desc: "You're building something and looking for the right person to build it with.",
-    features: ["Swipe to match", "Skill matching", "Idea alignment"],
+    id: "founder",
+    icon: "🧭",
+    title: "Founder",
+    desc: "You have a vision and need the right co-founder to build it with.",
+    features: ["Co-founder matching", "Events"],
   },
   {
-    id: "student",
-    icon: "🎓",
-    title: "Student",
-    desc: "Join projects, find a co-founder, or land your first startup job.",
-    features: ["Co-founder matching", "Project search", "Job search"],
-  },
-  {
-    id: "startup",
-    icon: "🚀",
-    title: "Startup",
-    desc: "Find a co-founder, post open projects, or hire your first team.",
-    features: ["Co-founder matching", "Post a project", "Post jobs"],
+    id: "builder",
+    icon: "🛠️",
+    title: "Builder",
+    desc: "You have skills and drive — find a co-founder, join a project, or land a role.",
+    features: ["Co-founder matching", "Join projects", "Job search", "Events"],
   },
   {
     id: "researcher",
     icon: "🔬",
     title: "Researcher",
-    desc: "Connect your research to the startups that can bring it to market.",
-    features: ["Business matching", "Project collaboration"],
+    desc: "Turn your research into a venture. Find a business co-founder and the right events.",
+    features: ["Co-founder matching", "Events"],
+  },
+  {
+    id: "startup",
+    icon: "🚀",
+    title: "Startup",
+    desc: "Post projects, hire talent, and find participants for your events.",
+    features: ["Post projects", "Post jobs", "Find talent", "Event recruiting"],
+  },
+  {
+    id: "corporate",
+    icon: "🏢",
+    title: "Corporate",
+    desc: "Source innovation, post projects, and connect with the startup ecosystem.",
+    features: ["Post projects", "Post jobs", "Find talent", "Event recruiting"],
   },
 ];
 
 export default function SignupPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,11 +53,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
 
   function toggleRole(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    setSelected((prev) => (prev === id ? null : id));
   }
 
   async function handleLinkedIn() {
@@ -60,7 +63,7 @@ export default function SignupPage() {
         redirectTo: `${window.location.origin}/auth/callback`,
         scopes: "openid profile email",
         queryParams: {
-          roles: Array.from(selected).join(","),
+          roles: selected ?? "",
         },
       },
     });
@@ -76,7 +79,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { full_name: name.trim(), roles: Array.from(selected) },
+        data: { full_name: name.trim(), role: selected },
       },
     });
 
@@ -103,11 +106,11 @@ export default function SignupPage() {
 
         {step === "roles" ? (
           <>
-            <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-3">
-              Who are you<br />building with?
+            <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-1">
+              What player are you?
             </h1>
-            <p className="text-[15px] text-white/45 leading-relaxed mb-2">
-              Find your co-founder, team, or next project — right here in Berlin.
+            <p className="text-[22px] text-white/25 leading-relaxed mb-2">
+              In the BAD1 ecosystem
             </p>
             <p className="text-[11px] tracking-[0.12em] uppercase text-white/25 mb-7">
               Select all that apply
@@ -115,7 +118,7 @@ export default function SignupPage() {
 
             <div className="flex flex-col gap-[10px] mb-8">
               {ROLES.map((role) => {
-                const isSelected = selected.has(role.id);
+                const isSelected = selected === role.id;
                 return (
                   <button
                     key={role.id}
@@ -170,7 +173,7 @@ export default function SignupPage() {
 
             <button
               onClick={() => setStep("account")}
-              disabled={selected.size === 0}
+              disabled={selected === null}
               className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] transition-opacity disabled:opacity-30 hover:opacity-90"
             >
               Continue →
@@ -198,9 +201,7 @@ export default function SignupPage() {
             <p className="text-[15px] text-white/45 leading-relaxed mb-8">
               You&apos;re joining as:{" "}
               <span className="text-white/70">
-                {Array.from(selected)
-                  .map((id) => ROLES.find((r) => r.id === id)?.title)
-                  .join(", ")}
+                {ROLES.find((r) => r.id === selected)?.title}
               </span>
             </p>
 

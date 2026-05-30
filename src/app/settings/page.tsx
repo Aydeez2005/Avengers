@@ -33,7 +33,7 @@ export default function SettingsPage() {
     supabase.auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata ?? {};
       setName(meta.full_name ?? data.user?.email ?? "");
-      setRoles(meta.roles ?? []);
+      setRoles(meta.role ? [meta.role] : []);
     });
   }, []);
 
@@ -47,10 +47,11 @@ export default function SettingsPage() {
   }
 
   const roleLabels: Record<string, string> = {
-    cofounder: "Co-founder",
-    student: "Student",
-    startup: "Startup",
+    founder: "Founder",
+    builder: "Builder",
     researcher: "Researcher",
+    startup: "Startup",
+    corporate: "Corporate",
   };
 
   return (
