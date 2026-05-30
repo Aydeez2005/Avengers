@@ -211,13 +211,41 @@ function FilterBar({ hasIdea, setHasIdea, category, setCategory }: {
 
 const EVENT_TYPE_EMOJI: Record<string, string> = { Hackathon: "⚡", Workshop: "🛠️", Meetup: "🤝", Conference: "🎤" };
 
-function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolean; onJoin: () => void }) {
+// Flexible event shape — works for both static mock and DB rows
+type AnyEvent = {
+  id: number | string;
+  name: string;
+  organiser?: string;
+  type?: string;
+  topic?: string;
+  date: string;
+  time?: string;
+  location: string;
+  tags: string[];
+  description?: string;
+  spots?: number;
+};
+
+function EventCard({ event, joined, onJoin }: { event: AnyEvent; joined: boolean; onJoin: () => Promise<void> }) {
+  const [registering, setRegistering] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function handleJoin() {
+    setRegistering(true);
+    setErr(null);
+    try { await onJoin(); } catch (e) { setErr(String(e)); }
+    setRegistering(false);
+  }
+
+  const typeLabel = event.type ?? event.topic ?? "Event";
+  const locationShort = event.location?.split(",")[0] ?? event.location;
+
   if (joined) return (
     <div className="border border-green-500/30 bg-green-500/5 rounded-3xl px-5 py-4 flex items-center gap-3">
       <span className="text-green-400 text-lg">✓</span>
       <div>
         <p className="text-sm font-semibold text-white">{event.name}</p>
-        <p className="text-xs text-white/40">{event.date} · {event.time}</p>
+        <p className="text-xs text-white/40">{event.date}{event.time ? ` · ${event.time}` : ""}</p>
       </div>
     </div>
   );
@@ -226,16 +254,16 @@ function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolea
       <div className="px-5 pt-5 pb-3">
         <div className="flex items-start justify-between mb-3">
           <span className="text-[10px] tracking-[0.2em] uppercase text-white/40 border border-white/15 rounded-full px-3 py-1">
-            {EVENT_TYPE_EMOJI[event.type]} {event.type}
+            {EVENT_TYPE_EMOJI[typeLabel] ?? "📅"} {typeLabel}
           </span>
-          <span className="text-[11px] text-white/40">📍 {event.location.split(",")[0]}</span>
+          <span className="text-[11px] text-white/40">📍 {locationShort}</span>
         </div>
         <h2 className="text-[20px] font-bold tracking-tight leading-tight mb-1">{event.name}</h2>
-        <p className="text-xs text-white/40 mb-1">{event.organiser}</p>
-        <p className="text-sm text-white/50 leading-relaxed">{event.description}</p>
+        {event.organiser && <p className="text-xs text-white/40 mb-1">{event.organiser}</p>}
+        {event.description && <p className="text-sm text-white/50 leading-relaxed">{event.description}</p>}
       </div>
       <div className="flex gap-5 px-5 pb-3">
-        {[["Date", event.date], ["Time", event.time], ["Spots", String(event.spots)]].map(([label, value]) => (
+        {[["Date", event.date], ...(event.time ? [["Time", event.time]] : []), ...(event.spots != null ? [["Spots", String(event.spots)]] : [])].map(([label, value]) => (
           <div key={label} className="flex flex-col gap-0.5">
             <span className="text-[9px] tracking-[0.2em] uppercase text-white/35">{label}</span>
             <span className="text-[13px] font-medium text-white">{value}</span>
@@ -246,8 +274,10 @@ function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolea
         {event.tags.map((tag) => <span key={tag} className="text-[11px] text-white/70 border border-white/15 rounded-full px-2.5 py-0.5">{tag}</span>)}
       </div>
       <div className="px-5 pb-5">
-        <button onClick={onJoin} className="w-full py-3 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold hover:bg-white/90 transition-colors">
-          Register →
+        {err && <p className="text-xs text-red-400 mb-2 text-center">{err}</p>}
+        <button onClick={handleJoin} disabled={registering}
+          className="w-full py-3 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold hover:bg-white/90 transition-colors disabled:opacity-50">
+          {registering ? "Registering…" : "Register →"}
         </button>
       </div>
     </div>
@@ -672,7 +702,7 @@ export default function DiscoverPage() {
   const [selectedCard, setSelectedCard] = useState<CofounderCard | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
   const [dbProjects, setDbProjects] = useState<ProjectData[]>([]);
-  const [dbEvents, setDbEvents] = useState<EventData[]>([]);
+  const [dbEvents, setDbEvents] = useState<AnyEvent[]>([]);
 
   // Business state
   const [businessView, setBusinessView] = useState<BusinessView>("home");
@@ -856,12 +886,16 @@ export default function DiscoverPage() {
                   <EventCard key={event.id} event={event} joined={joinedEvents.has(String(event.id))}
                     onJoin={async () => {
                       const id = String(event.id);
-                      setJoinedEvents((prev) => new Set([...prev, id]));
-                      await fetch("/api/event-registrations", {
+                      const res = await fetch("/api/event-registrations", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ event_id: id }),
                       });
+                      if (!res.ok) {
+                        const json = await res.json().catch(() => ({}));
+                        throw new Error(json?.error ?? "Registration failed");
+                      }
+                      setJoinedEvents((prev) => new Set([...prev, id]));
                     }} />
                 ))}
               </div>
