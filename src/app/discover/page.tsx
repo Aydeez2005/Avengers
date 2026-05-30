@@ -266,13 +266,22 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
       {[
         { placeholder: "Project name", value: name, set: setName },
         { placeholder: "Short description", value: description, set: setDescription },
-        { placeholder: "Deadline (e.g. 30 June 2026)", value: deadline, set: setDeadline },
         { placeholder: "Budget (e.g. €2,000)", value: budget, set: setBudget },
         { placeholder: "People required (e.g. 2)", value: people, set: setPeople },
       ].map(({ placeholder, value, set }) => (
         <input key={placeholder} type="text" placeholder={placeholder} value={value} onChange={(e) => set(e.target.value)}
           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
       ))}
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] tracking-[0.2em] uppercase text-white/35 px-1">Deadline</label>
+        <input
+          type="date"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
+          min={new Date().toISOString().split("T")[0]}
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white focus:outline-none focus:border-white/40 transition-colors [color-scheme:dark]"
+        />
+      </div>
       <div className="h-px bg-white/6 my-2" />
       <button onClick={onDone} disabled={!name || !description || !deadline || !budget || !people}
         className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
