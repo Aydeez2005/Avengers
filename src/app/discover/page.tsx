@@ -264,31 +264,33 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
     <div className="flex flex-col gap-3 pb-6">
       <h2 className="text-xl font-bold tracking-tight mb-1">Post a project</h2>
       <p className="text-sm text-white/40 mb-2">Builders will browse and apply.</p>
-      {[
-        { placeholder: "Project name", value: name, set: setName },
-        { placeholder: "Short description", value: description, set: setDescription },
-        { placeholder: "People required (e.g. 2)", value: people, set: setPeople },
-      ].map(({ placeholder, value, set }) => (
-        <input key={placeholder} type="text" placeholder={placeholder} value={value} onChange={(e) => set(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
-      ))}
+
+      <input type="text" placeholder="Project name" value={name} onChange={(e) => setName(e.target.value)}
+        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+      <input type="text" placeholder="Short description" value={description} onChange={(e) => setDescription(e.target.value)}
+        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+      <input type="text" placeholder="People required (e.g. 2)" value={people} onChange={(e) => setPeople(e.target.value)}
+        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+
+      {/* Budget with € prefix */}
       <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden focus-within:border-white/40 transition-colors">
         <span className="px-4 text-sm text-white/50 border-r border-white/10 py-[14px]">€</span>
         <input type="number" min="0" placeholder="Budget" value={budget} onChange={(e) => setBudget(e.target.value)}
           className="flex-1 bg-transparent px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none" />
       </div>
+
+      {/* Website link */}
       <input type="url" placeholder="Website / challenge link (optional)" value={website} onChange={(e) => setWebsite(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+
+      {/* Deadline */}
       <div className="flex flex-col gap-1">
         <label className="text-[10px] tracking-[0.2em] uppercase text-white/35 px-1">Deadline</label>
-        <input
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
+        <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)}
           min={new Date().toISOString().split("T")[0]}
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white focus:outline-none focus:border-white/40 transition-colors [color-scheme:dark]"
-        />
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white focus:outline-none focus:border-white/40 transition-colors [color-scheme:dark]" />
       </div>
+
       <div className="h-px bg-white/6 my-2" />
       <button onClick={onDone} disabled={!name || !description || !deadline || !budget || !people}
         className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
@@ -304,20 +306,47 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [topic, setTopic] = useState("");
+  const [showLuma, setShowLuma] = useState(false);
+  const [lumaUrl, setLumaUrl] = useState("");
 
   return (
     <div className="flex flex-col gap-3 pb-6">
       <h2 className="text-xl font-bold tracking-tight mb-1">Create an event</h2>
       <p className="text-sm text-white/40 mb-2">Workshops, hackathons, meetups — anything goes.</p>
+
+      {/* Luma import */}
+      {!showLuma ? (
+        <button onClick={() => setShowLuma(true)}
+          className="flex items-center justify-center gap-2 border border-white/15 rounded-xl px-4 py-3 text-sm text-white/50 hover:border-white/30 hover:text-white/80 transition-colors">
+          <span className="text-base">🌐</span> Import from Luma
+        </button>
+      ) : (
+        <div className="flex gap-2">
+          <input type="url" placeholder="Paste Luma event URL…" value={lumaUrl} onChange={(e) => setLumaUrl(e.target.value)} autoFocus
+            className="flex-1 bg-white/5 border border-white/20 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+          <button onClick={() => setShowLuma(false)}
+            className="px-4 py-[14px] text-white/30 hover:text-white/60 transition-colors text-sm">✕</button>
+        </div>
+      )}
+
+      <div className="h-px bg-white/6" />
+
       {[
         { placeholder: "Event name", value: name, set: setName },
         { placeholder: "Location", value: location, set: setLocation },
-        { placeholder: "Date (e.g. 15 July 2026)", value: date, set: setDate },
         { placeholder: "Topic (e.g. AI, HealthTech…)", value: topic, set: setTopic },
       ].map(({ placeholder, value, set }) => (
         <input key={placeholder} type="text" placeholder={placeholder} value={value} onChange={(e) => set(e.target.value)}
           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
       ))}
+
+      <div className="flex flex-col gap-1">
+        <label className="text-[10px] tracking-[0.2em] uppercase text-white/35 px-1">Date</label>
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+          min={new Date().toISOString().split("T")[0]}
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white focus:outline-none focus:border-white/40 transition-colors [color-scheme:dark]" />
+      </div>
+
       <div className="h-px bg-white/6 my-2" />
       <button onClick={onDone} disabled={!name || !location || !date || !topic}
         className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
