@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BottomNav from "@/components/BottomNav";
 import SwipeCard, { CardData } from "@/components/SwipeCard";
+import { supabase } from "@/lib/supabase";
 
 const MODES = ["Co-founders", "Projects", "Jobs", "Research"] as const;
 type Mode = typeof MODES[number];
@@ -149,6 +150,14 @@ export default function DiscoverPage() {
   const [cardStacks, setCardStacks] = useState<Record<Mode, CardData[]>>(CARDS_BY_MODE);
   const [matchCounts, setMatchCounts] = useState<Record<Mode, number>>({ "Co-founders": 0, "Projects": 0, "Jobs": 0, "Research": 0 });
   const [lastAction, setLastAction] = useState<"pass" | "connect" | null>(null);
+  const [userInitial, setUserInitial] = useState("·");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const name = data.user?.user_metadata?.full_name ?? data.user?.email ?? "";
+      if (name) setUserInitial(name[0].toUpperCase());
+    });
+  }, []);
 
   const cards = cardStacks[mode];
   const current = cards[0];
@@ -172,7 +181,7 @@ export default function DiscoverPage() {
       <div className="flex items-center justify-between px-6 pt-5 pb-3">
         <span className="text-xs font-bold tracking-[0.25em] uppercase text-white/90">Scout</span>
         <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-sm">
-          A
+          {userInitial}
         </div>
       </div>
 

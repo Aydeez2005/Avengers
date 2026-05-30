@@ -38,6 +38,7 @@ const ROLES = [
 export default function SignupPage() {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [step, setStep] = useState<"roles" | "account">("roles");
@@ -75,7 +76,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { roles: Array.from(selected) },
+        data: { full_name: name.trim(), roles: Array.from(selected) },
       },
     });
 
@@ -222,6 +223,13 @@ export default function SignupPage() {
 
             <div className="flex flex-col gap-3 mb-8">
               <input
+                type="text"
+                placeholder="Your name or company"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors"
+              />
+              <input
                 type="email"
                 placeholder="Email"
                 value={email}
@@ -245,7 +253,7 @@ export default function SignupPage() {
 
             <button
               onClick={handleSignup}
-              disabled={!email || !password || loading}
+              disabled={!name.trim() || !email || !password || loading}
               className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] transition-opacity disabled:opacity-30 hover:opacity-90"
             >
               {loading ? "Creating account…" : "Create account →"}

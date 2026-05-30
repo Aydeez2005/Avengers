@@ -1,4 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import { supabase } from "@/lib/supabase";
 
 const SECTIONS = [
   {
@@ -20,6 +25,34 @@ const SECTIONS = [
 ];
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [roles, setRoles] = useState<string[]>([]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data.user?.user_metadata ?? {};
+      setName(meta.full_name ?? data.user?.email ?? "");
+      setRoles(meta.roles ?? []);
+    });
+  }, []);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
+  function handleItem(item: string) {
+    if (item === "Sign out") handleSignOut();
+  }
+
+  const roleLabels: Record<string, string> = {
+    cofounder: "Co-founder",
+    student: "Student",
+    startup: "Startup",
+    researcher: "Researcher",
+  };
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex flex-col pb-24">
       <div className="px-6 pt-5 pb-4">
@@ -33,11 +66,11 @@ export default function SettingsPage() {
             👤
           </div>
           <div>
-            <h2 className="text-lg font-bold tracking-tight">Alice Zhai</h2>
+            <h2 className="text-lg font-bold tracking-tight">{name || "—"}</h2>
             <div className="flex gap-1.5 mt-1.5 flex-wrap">
-              {["Student", "Co-founder"].map((role) => (
-                <span key={role} className="text-[10px] tracking-[0.1em] uppercase text-white/50 border border-white/15 rounded-full px-2 py-0.5">
-                  {role}
+              {roles.map((r) => (
+                <span key={r} className="text-[10px] tracking-[0.1em] uppercase text-white/50 border border-white/15 rounded-full px-2 py-0.5">
+                  {roleLabels[r] ?? r}
                 </span>
               ))}
             </div>
@@ -55,6 +88,7 @@ export default function SettingsPage() {
                 {section.items.map((item, i) => (
                   <button
                     key={item}
+                    onClick={() => handleItem(item)}
                     className={`w-full text-left px-4 py-3.5 text-sm text-white/80 hover:bg-white/[0.03] hover:text-white transition-colors flex items-center justify-between ${
                       i < section.items.length - 1 ? "border-b border-white/6" : ""
                     } ${item === "Sign out" ? "text-red-400/70 hover:text-red-400" : ""}`}
