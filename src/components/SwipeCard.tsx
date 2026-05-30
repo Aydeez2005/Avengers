@@ -4,6 +4,7 @@ import { useState } from "react";
 
 export type CardData = {
   id: number;
+  userId?: string; // real Supabase user UUID
   type: "Startup" | "Co-founder" | "Researcher" | "Student";
   name: string;
   tagline: string;

@@ -587,6 +587,37 @@ function MyEventsView({ onBack }: { onBack: () => void }) {
   );
 }
 
+// ── Real profile helpers ───────────────────────────────────────────────────
+
+type RealProfile = {
+  id: string; full_name: string; role: string; has_idea: boolean | null;
+  categories: string[] | null; tagline: string | null; looking_for: string | null; location: string | null;
+};
+
+let _cardIdCounter = 1000;
+function profileToCard(p: RealProfile): CofounderCard {
+  const cats = p.categories ?? [];
+  const catLabel = cats.slice(0, 2).join(", ") || "Tech";
+  return {
+    id: _cardIdCounter++,
+    userId: p.id,
+    type: "Co-founder",
+    hasIdea: p.has_idea ?? false,
+    categories: cats.map((c) => c.toLowerCase()),
+    name: p.full_name || "Builder",
+    tagline: p.tagline || (p.has_idea
+      ? `Building something in ${catLabel}. Looking for the right co-founder.`
+      : `Experienced in ${catLabel}. Ready to join a great idea.`),
+    location: p.location || "Berlin",
+    tags: cats.length ? cats : ["Builder"],
+    lookingFor: p.looking_for || (p.has_idea ? "Technical or business co-founder" : "A founder with a problem worth solving"),
+    meta: [
+      { label: "Has idea", value: p.has_idea ? "Yes 💡" : "No 🔍" },
+      ...(cats.length ? [{ label: "Focus", value: catLabel }] : []),
+    ],
+  };
+}
+
 export default function DiscoverPage() {
   const [role, setRole] = useState<RoleKey>("builder");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -610,17 +641,21 @@ export default function DiscoverPage() {
   const [postedProjects, setPostedProjects] = useState<ProjectData[]>([]);
 
   useEffect(() => {
-    // Check localStorage first (demo flow — set by new signup page)
-    const localName = localStorage.getItem("scout_name");
-    if (localName) setUserInitial(localName[0].toUpperCase());
-
     supabase.auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata ?? {};
       const name = meta.full_name ?? data.user?.email ?? "";
-      if (name && !localName) setUserInitial(name[0].toUpperCase());
+      if (name) setUserInitial(name[0].toUpperCase());
       const userRole = meta.role as string;
       if (userRole === "admin") { setIsAdmin(true); }
       else { setRole((userRole as RoleKey) ?? "builder"); }
+      // Upsert own profile so we appear in others' stacks
+      fetch("/api/profiles", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+    });
+    // Load real builder profiles for swipe stack
+    fetch("/api/profiles").then((r) => r.json()).then((profiles: RealProfile[]) => {
+      if (Array.isArray(profiles) && profiles.length > 0) {
+        setCardStack(profiles.map(profileToCard));
+      }
     });
     // Load persisted registrations and applications
     fetch("/api/event-registrations").then((r) => r.json()).then((ids: string[]) => {
@@ -650,7 +685,16 @@ export default function DiscoverPage() {
 
   function handleConnect() {
     setLastAction("connect");
-    if (cardStack[0]) addMatch(cardStack[0]);
+    const card = cardStack[0];
+    if (card?.userId) {
+      fetch("/api/match-invites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receiver_id: card.userId }),
+      });
+    } else if (card) {
+      addMatch(card);
+    }
     setConnectCount((c) => c + 1);
     setCardStack((prev) => prev.slice(1));
     setTimeout(() => setLastAction(null), 800);
