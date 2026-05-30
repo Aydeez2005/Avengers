@@ -35,6 +35,7 @@ export default function SignupPage() {
 
   // Business fields
   const [companyName, setCompanyName] = useState("");
+  const [businessUrl, setBusinessUrl] = useState("");
 
   // Shared
   const [email, setEmail] = useState("");
@@ -56,7 +57,7 @@ export default function SignupPage() {
       role === "builder"
         ? { full_name: `${firstName.trim()} ${lastName.trim()}`, role: "builder", has_idea: hasIdea,
             categories: categories.map((c) => c === "other" && otherText.trim() ? otherText.trim() : c) }
-        : { full_name: companyName.trim(), role: "business", company_name: companyName.trim() };
+        : { full_name: companyName.trim(), role: "business", company_name: companyName.trim(), business_url: businessUrl.trim() || null };
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -135,8 +136,12 @@ export default function SignupPage() {
               </div>
             </>
           ) : (
-            <input type="text" placeholder="Company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+            <>
+              <input type="text" placeholder="Company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+              <input type="url" placeholder="Website or LinkedIn (optional)" value={businessUrl} onChange={(e) => setBusinessUrl(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+            </>
           )}
           <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import BottomNav from "@/components/BottomNav";
 import SwipeCard, { CardData } from "@/components/SwipeCard";
 import { supabase } from "@/lib/supabase";
+import { addMatch } from "@/lib/matches";
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -439,10 +440,14 @@ export default function DiscoverPage() {
   const [postedProjects, setPostedProjects] = useState<ProjectData[]>([]);
 
   useEffect(() => {
+    // Check localStorage first (demo flow — set by new signup page)
+    const localName = localStorage.getItem("scout_name");
+    if (localName) setUserInitial(localName[0].toUpperCase());
+
     supabase.auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata ?? {};
       const name = meta.full_name ?? data.user?.email ?? "";
-      if (name) setUserInitial(name[0].toUpperCase());
+      if (name && !localName) setUserInitial(name[0].toUpperCase());
       const userRole = meta.role as string;
       if (userRole === "admin") { setIsAdmin(true); }
       else { setRole((userRole as RoleKey) ?? "builder"); }
@@ -475,6 +480,7 @@ export default function DiscoverPage() {
 
   function handleConnect() {
     setLastAction("connect");
+    if (cardStack[0]) addMatch(cardStack[0]);
     setConnectCount((c) => c + 1);
     setCardStack((prev) => prev.slice(1));
     setTimeout(() => setLastAction(null), 800);
