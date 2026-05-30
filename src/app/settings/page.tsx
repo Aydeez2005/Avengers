@@ -223,9 +223,9 @@ export default function SettingsPage() {
               />
             </Field>
 
-            <Field label="LinkedIn URL">
+            <Field label="LinkedIn URL" hint="optional">
               <input
-                type="url"
+                type="text"
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.target.value)}
                 placeholder="linkedin.com/in/yourhandle"
