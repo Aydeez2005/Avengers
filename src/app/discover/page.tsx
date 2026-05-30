@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import SwipeCard, { CardData } from "@/components/SwipeCard";
 import { supabase } from "@/lib/supabase";
@@ -24,75 +25,93 @@ const CATEGORIES = [
 
 type CofounderCard = CardData & { hasIdea: boolean; categories: string[] };
 
+// randomuser.me gives consistent portrait photos per seed — purely for demo
+const PH = (seed: string, gender: "men" | "women", n: number) =>
+  `https://randomuser.me/api/portraits/${gender}/${n}.jpg`;
+
 const ALL_COFOUNDERS: CofounderCard[] = [
   // Has idea
   { id: 1, type: "Co-founder", hasIdea: true, categories: ["ai"],
+    avatarUrl: PH("lena", "women", 44),
     name: "Lena Müller", tagline: "Building an AI-powered legal contract tool. Need a business co-founder.", location: "Berlin",
     tags: ["AI", "LegalTech", "B2B"], lookingFor: "Business co-founder — sales & GTM",
     meta: [{ label: "Skills", value: "ML / Full-stack" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
     contact: { email: "lena.mueller@clausify.de", linkedin: "linkedin.com/in/lena-mueller-berlin" } },
   { id: 2, type: "Co-founder", hasIdea: true, categories: ["healthtech"],
+    avatarUrl: PH("yuki", "women", 31),
     name: "Dr. Yuki Tanaka", tagline: "Ex-Charité doctor building a digital diagnostics tool for rare diseases.", location: "Berlin",
     tags: ["HealthTech", "AI", "B2B"], lookingFor: "CTO / ML Engineer",
     meta: [{ label: "Background", value: "Medicine" }, { label: "Stage", value: "Pre-seed" }, { label: "Equity", value: "Open" }],
     contact: { email: "yuki.tanaka@raredx.io", linkedin: "linkedin.com/in/dr-yuki-tanaka" } },
   { id: 3, type: "Co-founder", hasIdea: true, categories: ["spacetech"],
+    avatarUrl: PH("nico", "men", 22),
     name: "Nico Braun", tagline: "Aerospace engineer. Building a real-time satellite imagery platform for logistics.", location: "Berlin",
     tags: ["SpaceTech", "Deep Tech", "B2B"], lookingFor: "Business co-founder — enterprise sales",
     meta: [{ label: "Background", value: "Aerospace" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
     contact: { email: "nico.braun@orbitview.space", linkedin: "linkedin.com/in/nico-braun-space" } },
   { id: 4, type: "Co-founder", hasIdea: true, categories: ["climatetech"],
+    avatarUrl: PH("sara", "women", 55),
     name: "Sara Kim", tagline: "Ex-Zalando product lead building a carbon footprint tracker for SMEs.", location: "Berlin",
     tags: ["ClimateTech", "SaaS", "B2B"], lookingFor: "Technical co-founder",
     meta: [{ label: "Background", value: "Product" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
     contact: { email: "sara.kim@ecotrace.io", linkedin: "linkedin.com/in/sara-kim-product" } },
   { id: 5, type: "Co-founder", hasIdea: true, categories: ["fintech"],
+    avatarUrl: PH("erik", "men", 37),
     name: "Erik Svensson", tagline: "Ex-N26 engineer building embedded insurance for gig-economy workers.", location: "Berlin",
     tags: ["FinTech", "Insurance", "B2C"], lookingFor: "Business co-founder — GTM & partnerships",
     meta: [{ label: "Skills", value: "Backend / Infra" }, { label: "Stage", value: "Pre-seed" }, { label: "Equity", value: "Open" }],
     contact: { email: "erik.svensson@gigcover.com", linkedin: "linkedin.com/in/erik-svensson-fintech" } },
   { id: 6, type: "Co-founder", hasIdea: true, categories: ["biotech"],
+    avatarUrl: PH("fatima", "women", 63),
     name: "Dr. Fatima Al-Hassan", tagline: "Biochemist at FU Berlin spinning out a drug discovery AI from her lab.", location: "Berlin",
     tags: ["Biotech", "AI", "Deep Tech"], lookingFor: "CEO / commercial co-founder",
     meta: [{ label: "Background", value: "Biochemistry" }, { label: "Stage", value: "Pre-seed" }, { label: "Patents", value: "2" }],
     contact: { email: "fatima.alhassan@fu-berlin.de", linkedin: "linkedin.com/in/dr-fatima-al-hassan" } },
   { id: 7, type: "Co-founder", hasIdea: true, categories: ["edtech"],
+    avatarUrl: PH("marco", "men", 48),
     name: "Marco Rossi", tagline: "Former teacher turned product manager. Building adaptive learning for K-12.", location: "Berlin",
     tags: ["EdTech", "AI", "B2C"], lookingFor: "Technical co-founder — full-stack + AI",
     meta: [{ label: "Background", value: "Product / Teaching" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
     contact: { email: "marco.rossi@learnloop.io", linkedin: "linkedin.com/in/marco-rossi-edtech" } },
   { id: 8, type: "Co-founder", hasIdea: true, categories: ["hardware"],
+    avatarUrl: PH("priya", "women", 19),
     name: "Priya Sharma", tagline: "Robotics engineer. Building affordable exoskeleton aids for elderly care.", location: "Berlin",
     tags: ["Hardware", "HealthTech", "Deep Tech"], lookingFor: "Business co-founder",
     meta: [{ label: "Background", value: "Robotics" }, { label: "Stage", value: "Prototype" }, { label: "Equity", value: "Open" }],
     contact: { email: "priya.sharma@exoaid.tech", linkedin: "linkedin.com/in/priya-sharma-robotics" } },
   // No idea
   { id: 9, type: "Co-founder", hasIdea: false, categories: ["ai", "fintech"],
+    avatarUrl: PH("max", "men", 11),
     name: "Max Becker", tagline: "Ex-BCG consultant. Strong in strategy and business development. Ready to go all-in.", location: "Berlin",
     tags: ["Strategy", "FinTech", "AI"], lookingFor: "A founder with a clear problem to solve",
     meta: [{ label: "Skills", value: "Strategy / Ops" }, { label: "Availability", value: "Full-time" }, { label: "Equity", value: "Open" }],
     contact: { email: "max.becker@gmail.com", linkedin: "linkedin.com/in/max-becker-strategy" } },
   { id: 10, type: "Co-founder", hasIdea: false, categories: ["healthtech", "biotech"],
+    avatarUrl: PH("aisha", "women", 72),
     name: "Aisha Ndiaye", tagline: "ML engineer, PhD TU Berlin. Wants to work on a hard health or biotech problem.", location: "Berlin",
     tags: ["AI", "HealthTech", "Biotech"], lookingFor: "A founder with a health or biotech idea",
     meta: [{ label: "Skills", value: "ML / AI" }, { label: "Availability", value: "Part-time" }, { label: "Equity", value: "Open" }],
     contact: { email: "aisha.ndiaye@tu-berlin.de", linkedin: "linkedin.com/in/aisha-ndiaye-ml" } },
   { id: 11, type: "Co-founder", hasIdea: false, categories: ["climatetech", "hardware"],
+    avatarUrl: PH("jonas", "men", 60),
     name: "Jonas Weber", tagline: "Hardware engineer, 5 years at Bosch. Passionate about climate and energy transition.", location: "Berlin",
     tags: ["ClimateTech", "Hardware", "Deep Tech"], lookingFor: "Founder with a climate or hardware vision",
     meta: [{ label: "Skills", value: "Hardware / EE" }, { label: "Availability", value: "Full-time" }, { label: "Notice", value: "1 month" }],
     contact: { email: "jonas.weber@protonmail.com", linkedin: "linkedin.com/in/jonas-weber-hardware" } },
   { id: 12, type: "Co-founder", hasIdea: false, categories: ["spacetech", "ai"],
+    avatarUrl: PH("elena", "women", 9),
     name: "Elena Petrova", tagline: "Data scientist at DLR. Wants to work on satellite data or AI applications.", location: "Berlin",
     tags: ["SpaceTech", "AI", "Data"], lookingFor: "Founder with a space or AI idea",
     meta: [{ label: "Skills", value: "Data Science" }, { label: "Availability", value: "Part-time" }, { label: "Equity", value: "Open" }],
     contact: { email: "elena.petrova@dlr.de", linkedin: "linkedin.com/in/elena-petrova-dlr" } },
   { id: 13, type: "Co-founder", hasIdea: false, categories: ["fintech", "ai"],
+    avatarUrl: PH("david", "men", 83),
     name: "David Osei", tagline: "Chartered accountant turned software engineer. Interested in fintech or AI automation.", location: "Berlin",
     tags: ["FinTech", "AI", "Accounting"], lookingFor: "Founder with a B2B SaaS idea",
     meta: [{ label: "Skills", value: "Finance / Engineering" }, { label: "Availability", value: "Full-time" }, { label: "Notice", value: "Immediate" }],
     contact: { email: "david.osei@outlook.com", linkedin: "linkedin.com/in/david-osei-fintech" } },
   { id: 14, type: "Co-founder", hasIdea: false, categories: ["edtech", "ai"],
+    avatarUrl: PH("hana", "women", 26),
     name: "Hana Nakamura", tagline: "Product designer at Duolingo Berlin. Ready to co-found an AI or EdTech startup.", location: "Berlin",
     tags: ["Design", "EdTech", "AI"], lookingFor: "Technical co-founder with a product vision",
     meta: [{ label: "Skills", value: "Product Design" }, { label: "Availability", value: "Full-time" }, { label: "Equity", value: "Open" }],
@@ -166,29 +185,26 @@ function FilterBar({ hasIdea, setHasIdea, category, setCategory }: {
   category: string; setCategory: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 mb-3">
-      {/* Has idea toggle */}
-      <div className="flex gap-2">
-        {[{ val: null, label: "Everyone" }, { val: true, label: "💡 Has idea" }, { val: false, label: "🔍 No idea" }].map((opt) => (
-          <button key={String(opt.val)} onClick={() => setHasIdea(opt.val as boolean | null)}
-            className={`flex-shrink-0 text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded-full border transition-colors ${
-              hasIdea === opt.val ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"
-            }`}>
-            {opt.label}
-          </button>
-        ))}
-      </div>
+    <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 mb-2">
+      {/* Idea filters */}
+      {[{ val: null, label: "All" }, { val: true, label: "💡 Idea" }, { val: false, label: "🔍 No idea" }].map((opt) => (
+        <button key={String(opt.val)} onClick={() => setHasIdea(opt.val as boolean | null)}
+          className={`flex-shrink-0 text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded-full border transition-colors ${
+            hasIdea === opt.val ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"
+          }`}>
+          {opt.label}
+        </button>
+      ))}
+      <div className="w-px bg-white/10 flex-shrink-0 mx-0.5" />
       {/* Category chips */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-        {CATEGORIES.map((cat) => (
-          <button key={cat.id} onClick={() => setCategory(cat.id)}
+      {CATEGORIES.filter(c => c.id !== "all").map((cat) => (
+          <button key={cat.id} onClick={() => setCategory(cat.id === category ? "all" : cat.id)}
             className={`flex-shrink-0 text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded-full border transition-colors ${
               category === cat.id ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"
             }`}>
             {cat.label}
           </button>
         ))}
-      </div>
     </div>
   );
 }
@@ -293,6 +309,7 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
   const [website, setWebsite] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
@@ -306,7 +323,8 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
       body: JSON.stringify({ name, description, deadline, budget, people, website, tags: selectedTags }),
     });
     setLoading(false);
-    onDone();
+    setSaved(true);
+    setTimeout(() => onDone(), 1500);
   }
 
   return (
@@ -355,10 +373,16 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
       </div>
 
       <div className="h-px bg-white/6 my-2" />
-      <button onClick={handleSubmit} disabled={!name || !description || !deadline || !budget || !people || loading}
-        className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
-        {loading ? "Posting…" : "Post project →"}
-      </button>
+      {saved ? (
+        <div className="w-full py-4 rounded-2xl bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-semibold text-center">
+          ✓ Project saved — going back…
+        </div>
+      ) : (
+        <button onClick={handleSubmit} disabled={!name || !description || !deadline || !budget || !people || loading}
+          className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
+          {loading ? "Saving…" : "Post project →"}
+        </button>
+      )}
     </div>
   );
 }
@@ -371,6 +395,7 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
   const [showLuma, setShowLuma] = useState(false);
   const [lumaUrl, setLumaUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   async function handleSubmit() {
     setLoading(true);
@@ -380,7 +405,8 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
       body: JSON.stringify({ name, location, date, topic, luma_url: lumaUrl || null }),
     });
     setLoading(false);
-    onDone();
+    setSaved(true);
+    setTimeout(() => onDone(), 1500);
   }
 
   return (
@@ -423,10 +449,16 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
       </div>
 
       <div className="h-px bg-white/6 my-2" />
-      <button onClick={handleSubmit} disabled={!name || !location || !date || !topic || loading}
-        className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
-        {loading ? "Creating…" : "Create event →"}
-      </button>
+      {saved ? (
+        <div className="w-full py-4 rounded-2xl bg-green-500/15 border border-green-500/30 text-green-400 text-sm font-semibold text-center">
+          ✓ Event saved — going back…
+        </div>
+      ) : (
+        <button onClick={handleSubmit} disabled={!name || !location || !date || !topic || loading}
+          className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
+          {loading ? "Saving…" : "Create event →"}
+        </button>
+      )}
     </div>
   );
 }
@@ -592,6 +624,7 @@ function MyEventsView({ onBack }: { onBack: () => void }) {
 type RealProfile = {
   id: string; full_name: string; role: string; has_idea: boolean | null;
   categories: string[] | null; tagline: string | null; looking_for: string | null; location: string | null;
+  avatar_url?: string | null;
 };
 
 let _cardIdCounter = 1000;
@@ -601,6 +634,7 @@ function profileToCard(p: RealProfile): CofounderCard {
   return {
     id: _cardIdCounter++,
     userId: p.id,
+    avatarUrl: p.avatar_url ?? undefined,
     type: "Co-founder",
     hasIdea: p.has_idea ?? false,
     categories: cats.map((c) => c.toLowerCase()),
@@ -619,6 +653,7 @@ function profileToCard(p: RealProfile): CofounderCard {
 }
 
 export default function DiscoverPage() {
+  const router = useRouter();
   const [role, setRole] = useState<RoleKey>("builder");
   const [isAdmin, setIsAdmin] = useState(false);
   const [viewingAs, setViewingAs] = useState<RoleKey>("builder");
@@ -628,13 +663,16 @@ export default function DiscoverPage() {
   const [builderTab, setBuilderTab] = useState<BuilderTab>("Co-founders");
   const [ideaFilter, setIdeaFilter] = useState<boolean | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [cardStack, setCardStack] = useState<CofounderCard[]>(ALL_COFOUNDERS);
+  const [cardStack, setCardStack] = useState<CofounderCard[]>([]);
+  const [lastUndoCard, setLastUndoCard] = useState<CofounderCard | null>(null);
   const [connectCount, setConnectCount] = useState(0);
   const [lastAction, setLastAction] = useState<"pass" | "connect" | null>(null);
   const [joinedEvents, setJoinedEvents] = useState<Set<string>>(new Set());
   const [appliedProjects, setAppliedProjects] = useState<Set<string>>(new Set());
   const [selectedCard, setSelectedCard] = useState<CofounderCard | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
+  const [dbProjects, setDbProjects] = useState<ProjectData[]>([]);
+  const [dbEvents, setDbEvents] = useState<EventData[]>([]);
 
   // Business state
   const [businessView, setBusinessView] = useState<BusinessView>("home");
@@ -651,11 +689,20 @@ export default function DiscoverPage() {
       // Upsert own profile so we appear in others' stacks
       fetch("/api/profiles", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
     });
-    // Load real builder profiles for swipe stack
+    // Load real builder profiles for swipe stack (fall back to mock if empty)
     fetch("/api/profiles").then((r) => r.json()).then((profiles: RealProfile[]) => {
       if (Array.isArray(profiles) && profiles.length > 0) {
         setCardStack(profiles.map(profileToCard));
+      } else {
+        setCardStack(ALL_COFOUNDERS);
       }
+    }).catch(() => setCardStack(ALL_COFOUNDERS));
+    // Load real projects and events
+    fetch("/api/projects").then((r) => r.json()).then((data) => {
+      if (Array.isArray(data) && data.length > 0) setDbProjects(data);
+    });
+    fetch("/api/events").then((r) => r.json()).then((data) => {
+      if (Array.isArray(data) && data.length > 0) setDbEvents(data);
     });
     // Load persisted registrations and applications
     fetch("/api/event-registrations").then((r) => r.json()).then((ids: string[]) => {
@@ -666,25 +713,38 @@ export default function DiscoverPage() {
     });
   }, []);
 
-  // Recompute filtered cards when filters change
+  // Recompute filtered cards when filters change (only applied to mock stack)
+  const [baseStack, setBaseStack] = useState<CofounderCard[]>([]);
+  useEffect(() => { setBaseStack(cardStack); }, []); // capture initial load once
   useEffect(() => {
-    let filtered = ALL_COFOUNDERS;
+    if (baseStack.length === 0) return;
+    let filtered = baseStack;
     if (ideaFilter !== null) filtered = filtered.filter((c) => c.hasIdea === ideaFilter);
     if (categoryFilter !== "all") filtered = filtered.filter((c) => c.categories.includes(categoryFilter));
     setCardStack(filtered);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ideaFilter, categoryFilter]);
 
   const effectiveRole: RoleKey = isAdmin ? viewingAs : role;
   const currentCard = cardStack[0];
 
+  function handleUndo() {
+    if (!lastUndoCard) return;
+    setCardStack((prev) => [lastUndoCard, ...prev]);
+    setLastUndoCard(null);
+    setLastAction(null);
+  }
+
   function handlePass() {
     setLastAction("pass");
+    setLastUndoCard(cardStack[0] ?? null);
     setCardStack((prev) => prev.slice(1));
     setTimeout(() => setLastAction(null), 800);
   }
 
   function handleConnect() {
     setLastAction("connect");
+    setLastUndoCard(cardStack[0] ?? null);
     const card = cardStack[0];
     if (card?.userId) {
       fetch("/api/match-invites", {
@@ -701,11 +761,11 @@ export default function DiscoverPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] flex flex-col pb-24">
+    <main className="h-[100dvh] bg-[#0a0a0a] flex flex-col overflow-hidden pb-[72px]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 pt-5 pb-2">
+      <div className="flex items-center justify-between px-6 pt-4 pb-1">
         <span className="text-xs font-bold tracking-[0.25em] uppercase text-white/90">Scout</span>
-        <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-sm">{userInitial}</div>
+        <button onClick={() => router.push("/settings")} className="w-8 h-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-sm hover:bg-white/20 transition-colors">{userInitial}</button>
       </div>
 
       {/* Admin switcher */}
@@ -729,7 +789,7 @@ export default function DiscoverPage() {
       {effectiveRole === "builder" && (
         <>
           {/* Tabs */}
-          <div className="flex gap-2 px-5 pb-2 overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 px-5 pb-1 overflow-x-auto no-scrollbar">
             {(["Co-founders", "Projects", "Events"] as BuilderTab[]).map((tab) => (
               <button key={tab} onClick={() => setBuilderTab(tab)}
                 className={`flex-shrink-0 text-[11px] tracking-[0.15em] uppercase px-3.5 py-1.5 rounded-full border transition-colors ${builderTab === tab ? "border-white/60 text-white bg-white/10" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"}`}>
@@ -742,32 +802,37 @@ export default function DiscoverPage() {
             <div className="mx-6 mb-3 bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-2.5 text-sm text-green-400 text-center animate-pulse">✓ Connected!</div>
           )}
 
-          <div className="flex-1 flex flex-col px-5 pt-1">
+          <div className="flex-1 flex flex-col px-5 pt-1 overflow-hidden">
             {builderTab === "Co-founders" && (
-              <>
+              <div className="flex flex-col h-full">
                 <FilterBar hasIdea={ideaFilter} setHasIdea={setIdeaFilter} category={categoryFilter} setCategory={setCategoryFilter} />
-                {currentCard ? (
-                  <>
-                    <SwipeCard key={currentCard.id} card={currentCard} onPass={handlePass} onConnect={handleConnect} onCardClick={() => setSelectedCard(currentCard)} />
-                    <div className="flex items-center justify-center gap-8 mt-6">
-                      <button onClick={handlePass} className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-red-400/60 hover:text-red-400 transition-colors text-2xl">✕</button>
-                      <button onClick={handleConnect} className="w-[72px] h-[72px] rounded-full bg-white flex items-center justify-center text-[#0a0a0a] hover:bg-white/90 transition-colors text-3xl">♥</button>
-                    </div>
-                    <p className="text-center text-[11px] text-white/20 mt-4 tracking-[0.1em] uppercase">{cardStack.length} left · {connectCount} connected</p>
-                  </>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 py-20">
+                {cardStack.length === 0 && !currentCard ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
                     <div className="text-4xl">🎉</div>
                     <h2 className="text-xl font-bold tracking-tight">All caught up</h2>
                     <p className="text-sm text-white/40">Try adjusting your filters or check back soon.</p>
                   </div>
-                )}
-              </>
+                ) : currentCard ? (
+                  <>
+                    <div className="flex-1 min-h-0">
+                      <SwipeCard key={currentCard.id} card={currentCard} onPass={handlePass} onConnect={handleConnect} onCardClick={() => setSelectedCard(currentCard)} />
+                    </div>
+                    <div className="flex items-center justify-center gap-6 mt-3 flex-shrink-0">
+                      <button onClick={handlePass} className="w-13 h-13 w-[52px] h-[52px] rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-red-400/60 hover:text-red-400 transition-colors text-xl">✕</button>
+                      {lastUndoCard && (
+                        <button onClick={handleUndo} className="w-[40px] h-[40px] rounded-full border border-white/15 flex items-center justify-center text-white/30 hover:text-white/60 hover:border-white/30 transition-colors text-sm">↩</button>
+                      )}
+                      <button onClick={handleConnect} className="w-[56px] h-[56px] rounded-full bg-white flex items-center justify-center text-[#0a0a0a] hover:bg-white/90 transition-colors text-xl">♥</button>
+                    </div>
+                    <p className="text-center text-[10px] text-white/20 mt-1.5 mb-1 tracking-[0.1em] uppercase flex-shrink-0">{cardStack.length} left · {connectCount} connected</p>
+                  </>
+                ) : null}
+              </div>
             )}
 
             {builderTab === "Projects" && (
-              <div className="flex flex-col gap-4 pb-4">
-                {MOCK_PROJECTS.map((p) => (
+              <div className="flex flex-col gap-4 pb-4 overflow-y-auto">
+                {(dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS).map((p) => (
                   <ProjectCard key={p.id} project={p}
                     applied={appliedProjects.has(String(p.id))}
                     onApply={async () => {
@@ -786,8 +851,8 @@ export default function DiscoverPage() {
             )}
 
             {builderTab === "Events" && (
-              <div className="flex flex-col gap-4 pb-4">
-                {EVENTS.map((event) => (
+              <div className="flex flex-col gap-4 pb-4 overflow-y-auto">
+                {(dbEvents.length > 0 ? dbEvents : EVENTS).map((event) => (
                   <EventCard key={event.id} event={event} joined={joinedEvents.has(String(event.id))}
                     onJoin={async () => {
                       const id = String(event.id);

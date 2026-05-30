@@ -49,19 +49,25 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const meta = user.user_metadata ?? {};
 
+  const upsertData: Record<string, unknown> = {
+    id: user.id,
+    full_name: body.full_name ?? meta.full_name ?? user.email,
+    role: body.role ?? meta.role ?? "builder",
+    has_idea: body.has_idea ?? meta.has_idea ?? null,
+    categories: body.categories ?? meta.categories ?? [],
+    tagline: body.tagline ?? meta.tagline ?? null,
+    looking_for: body.looking_for ?? meta.looking_for ?? null,
+    location: body.location ?? meta.location ?? "Berlin",
+    updated_at: new Date().toISOString(),
+  };
+  if (body.avatar_url !== undefined) upsertData.avatar_url = body.avatar_url;
+  if (body.bio !== undefined) upsertData.bio = body.bio;
+  if (body.education !== undefined) upsertData.education = body.education;
+  if (body.linkedin_url !== undefined) upsertData.linkedin_url = body.linkedin_url;
+
   const { data, error } = await supabase
     .from("profiles")
-    .upsert({
-      id: user.id,
-      full_name: body.full_name ?? meta.full_name ?? user.email,
-      role: body.role ?? meta.role ?? "builder",
-      has_idea: body.has_idea ?? meta.has_idea ?? null,
-      categories: body.categories ?? meta.categories ?? [],
-      tagline: body.tagline ?? meta.tagline ?? null,
-      looking_for: body.looking_for ?? meta.looking_for ?? null,
-      location: body.location ?? meta.location ?? "Berlin",
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "id" })
+    .upsert(upsertData, { onConflict: "id" })
     .select()
     .single();
 
