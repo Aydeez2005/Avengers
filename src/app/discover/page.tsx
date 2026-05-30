@@ -435,7 +435,157 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
 
 type RoleKey = "builder" | "business";
 type BuilderTab = "Co-founders" | "Projects" | "Events";
-type BusinessView = "home" | "post-project" | "create-event";
+type BusinessView = "home" | "post-project" | "create-event" | "my-projects" | "my-events";
+
+// ── Business sub-screens ───────────────────────────────────────────────────
+
+type DbProject = { id: string; name: string; deadline: string | null; budget: number | null; description: string; people_required: number; tags: string[]; };
+type DbEvent   = { id: string; name: string; date: string; location: string; topic: string; description?: string; };
+type Application = { project_id: string; user_id: string; user_name: string; message: string | null; created_at: string; };
+type Registration = { event_id: string; user_id: string; user_name: string; created_at: string; };
+
+function MyProjectsView({ onBack }: { onBack: () => void }) {
+  const [projects, setProjects] = useState<DbProject[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/projects?mine=true").then((r) => r.json()),
+      fetch("/api/project-applications?as_owner=true").then((r) => r.json()),
+    ]).then(([projs, apps]) => {
+      setProjects(Array.isArray(projs) ? projs : []);
+      setApplications(Array.isArray(apps) ? apps : []);
+      setLoading(false);
+    });
+  }, []);
+
+  function applicantsFor(projectId: string) {
+    return applications.filter((a) => a.project_id === projectId);
+  }
+
+  return (
+    <div className="flex flex-col gap-3 pb-6">
+      <button onClick={onBack} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 transition-colors text-left mb-2">← Back</button>
+      <h2 className="text-xl font-bold tracking-tight mb-1">My Projects</h2>
+      <p className="text-sm text-white/40 mb-2">Projects you posted and their applicants.</p>
+
+      {loading ? (
+        <p className="text-sm text-white/30 py-10 text-center">Loading…</p>
+      ) : projects.length === 0 ? (
+        <p className="text-sm text-white/30 py-10 text-center">No projects yet — post one from the dashboard.</p>
+      ) : projects.map((p) => {
+        const applicants = applicantsFor(p.id);
+        const isOpen = expanded === p.id;
+        return (
+          <div key={p.id} className="border border-white/10 rounded-2xl overflow-hidden">
+            <button onClick={() => setExpanded(isOpen ? null : p.id)}
+              className="w-full text-left px-4 py-4 hover:bg-white/[0.02] transition-colors">
+              <div className="flex items-start justify-between mb-1">
+                <span className="font-semibold text-sm text-white">{p.name}</span>
+                <span className="text-[10px] text-white/40 border border-white/10 rounded-full px-2 py-0.5 ml-2 flex-shrink-0">
+                  {applicants.length} applicant{applicants.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+              {p.deadline && <p className="text-xs text-white/35">Due {p.deadline}</p>}
+              {p.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {p.tags.map((t) => <span key={t} className="text-[10px] text-white/40 border border-white/8 rounded-full px-2 py-0.5">{t}</span>)}
+                </div>
+              )}
+              <div className="text-[10px] text-white/25 mt-2 tracking-wider">{isOpen ? "▲ collapse" : "▼ see applicants"}</div>
+            </button>
+
+            {isOpen && (
+              <div className="border-t border-white/8 px-4 py-3 bg-white/[0.02]">
+                {applicants.length === 0 ? (
+                  <p className="text-xs text-white/30 py-2 text-center">No applicants yet.</p>
+                ) : applicants.map((a, i) => (
+                  <div key={i} className={`py-3 ${i > 0 ? "border-t border-white/6" : ""}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-white">{a.user_name || "Builder"}</span>
+                      <span className="text-[10px] text-white/30">{new Date(a.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                    </div>
+                    {a.message && <p className="text-xs text-white/50 mt-1 leading-relaxed">{a.message}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function MyEventsView({ onBack }: { onBack: () => void }) {
+  const [events, setEvents] = useState<DbEvent[]>([]);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/events?mine=true").then((r) => r.json()),
+      fetch("/api/event-registrations?as_owner=true").then((r) => r.json()),
+    ]).then(([evts, regs]) => {
+      setEvents(Array.isArray(evts) ? evts : []);
+      setRegistrations(Array.isArray(regs) ? regs : []);
+      setLoading(false);
+    });
+  }, []);
+
+  function registrantsFor(eventId: string) {
+    return registrations.filter((r) => r.event_id === eventId);
+  }
+
+  return (
+    <div className="flex flex-col gap-3 pb-6">
+      <button onClick={onBack} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 transition-colors text-left mb-2">← Back</button>
+      <h2 className="text-xl font-bold tracking-tight mb-1">My Events</h2>
+      <p className="text-sm text-white/40 mb-2">Events you created and who registered.</p>
+
+      {loading ? (
+        <p className="text-sm text-white/30 py-10 text-center">Loading…</p>
+      ) : events.length === 0 ? (
+        <p className="text-sm text-white/30 py-10 text-center">No events yet — create one from the dashboard.</p>
+      ) : events.map((e) => {
+        const registrants = registrantsFor(e.id);
+        const isOpen = expanded === e.id;
+        return (
+          <div key={e.id} className="border border-white/10 rounded-2xl overflow-hidden">
+            <button onClick={() => setExpanded(isOpen ? null : e.id)}
+              className="w-full text-left px-4 py-4 hover:bg-white/[0.02] transition-colors">
+              <div className="flex items-start justify-between mb-1">
+                <span className="font-semibold text-sm text-white">{e.name}</span>
+                <span className="text-[10px] text-white/40 border border-white/10 rounded-full px-2 py-0.5 ml-2 flex-shrink-0">
+                  {registrants.length} registered
+                </span>
+              </div>
+              <p className="text-xs text-white/35">📍 {e.location} · {e.date}</p>
+              {e.topic && <p className="text-xs text-white/30 mt-0.5">{e.topic}</p>}
+              <div className="text-[10px] text-white/25 mt-2 tracking-wider">{isOpen ? "▲ collapse" : "▼ see registrants"}</div>
+            </button>
+
+            {isOpen && (
+              <div className="border-t border-white/8 px-4 py-3 bg-white/[0.02]">
+                {registrants.length === 0 ? (
+                  <p className="text-xs text-white/30 py-2 text-center">No registrants yet.</p>
+                ) : registrants.map((r, i) => (
+                  <div key={i} className={`flex items-center justify-between py-2.5 ${i > 0 ? "border-t border-white/6" : ""}`}>
+                    <span className="text-sm text-white">{r.user_name || "Builder"}</span>
+                    <span className="text-[10px] text-white/30">{new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function DiscoverPage() {
   const [role, setRole] = useState<RoleKey>("builder");
@@ -619,7 +769,8 @@ export default function DiscoverPage() {
               <h1 className="text-2xl font-bold tracking-tight mb-1">Dashboard</h1>
               <p className="text-sm text-white/40 mb-6">Post projects and run events for the BAD1 community.</p>
 
-              <div className="flex flex-col gap-3 mb-8">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-3">Create</p>
+              <div className="flex flex-col gap-3 mb-6">
                 <button onClick={() => setBusinessView("post-project")}
                   className="flex items-center gap-4 border border-white/10 rounded-2xl px-4 py-4 hover:border-white/25 transition-colors text-left">
                   <div className="w-10 h-10 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-xl">📋</div>
@@ -640,15 +791,27 @@ export default function DiscoverPage() {
                 </button>
               </div>
 
-              {/* Active projects */}
-              <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-3">Your projects</p>
-              {[...MOCK_PROJECTS, ...postedProjects].length === 0 ? (
-                <p className="text-sm text-white/30">No projects yet.</p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {[...MOCK_PROJECTS, ...postedProjects].map((p) => <ProjectCard key={p.id} project={p} />)}
-                </div>
-              )}
+              <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-3">Manage</p>
+              <div className="flex flex-col gap-3">
+                <button onClick={() => setBusinessView("my-projects")}
+                  className="flex items-center gap-4 border border-white/10 rounded-2xl px-4 py-4 hover:border-white/25 transition-colors text-left">
+                  <div className="w-10 h-10 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-xl">📁</div>
+                  <div>
+                    <p className="font-semibold text-sm text-white">My Projects</p>
+                    <p className="text-xs text-white/40 mt-0.5">View posted projects and applicants</p>
+                  </div>
+                  <span className="ml-auto text-white/20 text-xs">›</span>
+                </button>
+                <button onClick={() => setBusinessView("my-events")}
+                  className="flex items-center gap-4 border border-white/10 rounded-2xl px-4 py-4 hover:border-white/25 transition-colors text-left">
+                  <div className="w-10 h-10 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-xl">📅</div>
+                  <div>
+                    <p className="font-semibold text-sm text-white">My Events</p>
+                    <p className="text-xs text-white/40 mt-0.5">View created events and registrations</p>
+                  </div>
+                  <span className="ml-auto text-white/20 text-xs">›</span>
+                </button>
+              </div>
             </>
           )}
 
@@ -658,6 +821,14 @@ export default function DiscoverPage() {
 
           {businessView === "create-event" && (
             <CreateEventForm onDone={() => setBusinessView("home")} />
+          )}
+
+          {businessView === "my-projects" && (
+            <MyProjectsView onBack={() => setBusinessView("home")} />
+          )}
+
+          {businessView === "my-events" && (
+            <MyEventsView onBack={() => setBusinessView("home")} />
           )}
         </div>
       )}
