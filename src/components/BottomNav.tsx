@@ -46,11 +46,12 @@ export default function BottomNav() {
     });
   }, []);
 
+  const visibleTabs = isBusiness ? TABS.filter((t) => t.href !== "/matches") : TABS;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 flex justify-around items-center px-6 pb-8 pt-3 border-t border-white/6 bg-[#0a0a0a]/95 backdrop-blur-sm z-50">
-      {TABS.map(({ href, label, icon, ...rest }) => {
+      {visibleTabs.map(({ href, label, icon }) => {
         const active = pathname.startsWith(href);
-        const displayLabel = isBusiness && "businessLabel" in rest ? rest.businessLabel : label;
         return (
           <Link
             key={href}
@@ -58,7 +59,7 @@ export default function BottomNav() {
             className={`flex flex-col items-center gap-1 transition-colors ${active ? "text-white" : "text-white/30 hover:text-white/60"}`}
           >
             {icon(active)}
-            <span className="text-[10px] tracking-[0.1em] uppercase">{displayLabel}</span>
+            <span className="text-[10px] tracking-[0.1em] uppercase">{label}</span>
           </Link>
         );
       })}

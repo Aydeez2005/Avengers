@@ -30,8 +30,9 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-start py-10 px-4">
       <div className="w-full max-w-[390px] flex flex-col">
-        <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/90 mb-12">
-          Scout
+        <div className="flex items-center justify-between mb-12">
+          <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/90">Scout</div>
+          <a href="/signup" className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 transition-colors">← Back</a>
         </div>
 
         <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-3">

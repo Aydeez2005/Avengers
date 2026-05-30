@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     budget: body.budget ? Number(body.budget) : null,
     people_required: body.people ? Number(body.people) : 1,
     website: body.website ?? null,
-    tags: [],
+    tags: Array.isArray(body.tags) ? body.tags : [],
   }).select().single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

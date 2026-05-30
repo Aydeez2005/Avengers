@@ -282,6 +282,8 @@ function ProjectCard({ project, applied, onApply, onDetails }: {
 
 // ── Business: Post form ────────────────────────────────────────────────────
 
+const PROJECT_TAGS = ["AI", "HealthTech", "SpaceTech", "ClimateTech", "FinTech", "Biotech", "Hardware", "EdTech", "Web3", "Sustainability", "Backend", "Frontend", "Design", "Data", "Other"];
+
 function PostProjectForm({ onDone }: { onDone: () => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -289,14 +291,19 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
   const [budget, setBudget] = useState("");
   const [people, setPeople] = useState("");
   const [website, setWebsite] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  function toggleTag(tag: string) {
+    setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+  }
 
   async function handleSubmit() {
     setLoading(true);
     await fetch("/api/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description, deadline, budget, people, website }),
+      body: JSON.stringify({ name, description, deadline, budget, people, website, tags: selectedTags }),
     });
     setLoading(false);
     onDone();
@@ -304,13 +311,27 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="flex flex-col gap-3 pb-6">
+      <button onClick={onDone} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 transition-colors text-left mb-2">← Back</button>
       <h2 className="text-xl font-bold tracking-tight mb-1">Post a project</h2>
       <p className="text-sm text-white/40 mb-2">Builders will browse and apply.</p>
 
       <input type="text" placeholder="Project name" value={name} onChange={(e) => setName(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
-      <input type="text" placeholder="Describe a real problem, set a budget, and let BAD1 builders propose solutions" value={description} onChange={(e) => setDescription(e.target.value)}
+      <input type="text" placeholder="Short description" value={description} onChange={(e) => setDescription(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+
+      {/* Category tags */}
+      <div className="flex flex-col gap-2">
+        <label className="text-[10px] tracking-[0.2em] uppercase text-white/35 px-1">Categories</label>
+        <div className="flex flex-wrap gap-2">
+          {PROJECT_TAGS.map((tag) => (
+            <button key={tag} type="button" onClick={() => toggleTag(tag)}
+              className={`text-[11px] px-3 py-1.5 rounded-full border transition-colors ${selectedTags.includes(tag) ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/40 hover:border-white/30 hover:text-white/70"}`}>
+              {tag}
+            </button>
+          ))}
+        </div>
+      </div>
       <input type="text" placeholder="People required (e.g. 2)" value={people} onChange={(e) => setPeople(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
 
@@ -338,7 +359,6 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
         className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
         {loading ? "Posting…" : "Post project →"}
       </button>
-      <button onClick={onDone} className="text-center text-sm text-white/30 hover:text-white/60 transition-colors">Cancel</button>
     </div>
   );
 }
@@ -365,6 +385,7 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="flex flex-col gap-3 pb-6">
+      <button onClick={onDone} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 transition-colors text-left mb-2">← Back</button>
       <h2 className="text-xl font-bold tracking-tight mb-1">Create an event</h2>
       <p className="text-sm text-white/40 mb-2">Workshops, hackathons, meetups — anything goes.</p>
 
@@ -406,7 +427,6 @@ function CreateEventForm({ onDone }: { onDone: () => void }) {
         className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
         {loading ? "Creating…" : "Create event →"}
       </button>
-      <button onClick={onDone} className="text-center text-sm text-white/30 hover:text-white/60 transition-colors">Cancel</button>
     </div>
   );
 }
@@ -605,7 +625,7 @@ export default function DiscoverPage() {
                   <div className="w-10 h-10 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-xl">📋</div>
                   <div>
                     <p className="font-semibold text-sm text-white">Post a project</p>
-                    <p className="text-xs text-white/40 mt-0.5">Builders browse and apply</p>
+                    <p className="text-xs text-white/40 mt-0.5">Describe a real problem, set a budget, and let BAD1 builders propose solutions</p>
                   </div>
                   <span className="ml-auto text-white/20 text-xs">›</span>
                 </button>

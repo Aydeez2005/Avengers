@@ -53,8 +53,10 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex flex-col pb-24">
-      <div className="px-6 pt-5 pb-4">
+      <div className="flex items-center justify-between px-6 pt-5 pb-4">
+        <button onClick={() => router.back()} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 transition-colors">← Back</button>
         <span className="text-xs font-bold tracking-[0.25em] uppercase text-white/90">Scout</span>
+        <div className="w-12" />
       </div>
 
       <div className="px-6">
