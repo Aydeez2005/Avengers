@@ -30,6 +30,7 @@ export default function SignupPage() {
   const [lastName, setLastName] = useState("");
   const [hasIdea, setHasIdea] = useState<boolean | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
+  const [otherText, setOtherText] = useState("");
 
   // Business fields
   const [companyName, setCompanyName] = useState("");
@@ -52,7 +53,8 @@ export default function SignupPage() {
 
     const metadata =
       role === "builder"
-        ? { full_name: `${firstName.trim()} ${lastName.trim()}`, role: "builder", has_idea: hasIdea, categories }
+        ? { full_name: `${firstName.trim()} ${lastName.trim()}`, role: "builder", has_idea: hasIdea,
+            categories: categories.map((c) => c === "other" && otherText.trim() ? otherText.trim() : c) }
         : { full_name: companyName.trim(), role: "business", company_name: companyName.trim() };
 
     const { data, error: signUpError } = await supabase.auth.signUp({
@@ -211,7 +213,7 @@ export default function SignupPage() {
         </h1>
         <p className="text-[15px] text-white/40 mb-8">Select all that apply.</p>
 
-        <div className="flex flex-wrap gap-2 mb-10">
+        <div className="flex flex-wrap gap-2 mb-4">
           {CATEGORIES.map((cat) => {
             const active = categories.includes(cat.id);
             return (
@@ -223,10 +225,22 @@ export default function SignupPage() {
           })}
         </div>
 
+        {categories.includes("other") && (
+          <input
+            type="text"
+            placeholder="Describe your field…"
+            value={otherText}
+            onChange={(e) => setOtherText(e.target.value)}
+            autoFocus
+            className="w-full bg-white/5 border border-white/30 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/50 transition-colors mb-4"
+          />
+        )}
+
         {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
         <div className="h-px bg-white/6 mb-6" />
 
-        <button onClick={handleSignup} disabled={categories.length === 0 || loading}
+        <button onClick={handleSignup}
+          disabled={categories.length === 0 || (categories.includes("other") && !otherText.trim()) || loading}
           className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] disabled:opacity-30 hover:opacity-90 transition-opacity">
           {loading ? "Creating account…" : "Enter Scout →"}
         </button>
