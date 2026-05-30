@@ -15,9 +15,16 @@ function makeClient(cookieStore: Awaited<ReturnType<typeof cookies>>) {
   );
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = makeClient(await cookies());
-  const { data, error } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
+  const mine = new URL(request.url).searchParams.get("mine") === "true";
+  let query = supabase.from("projects").select("*").order("created_at", { ascending: false });
+  if (mine) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json([]);
+    query = query.eq("created_by", user.id);
+  }
+  const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }

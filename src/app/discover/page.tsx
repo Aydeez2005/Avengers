@@ -28,60 +28,74 @@ const ALL_COFOUNDERS: CofounderCard[] = [
   { id: 1, type: "Co-founder", hasIdea: true, categories: ["ai"],
     name: "Lena Müller", tagline: "Building an AI-powered legal contract tool. Need a business co-founder.", location: "Berlin",
     tags: ["AI", "LegalTech", "B2B"], lookingFor: "Business co-founder — sales & GTM",
-    meta: [{ label: "Skills", value: "ML / Full-stack" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }] },
+    meta: [{ label: "Skills", value: "ML / Full-stack" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
+    contact: { email: "lena.mueller@clausify.de", linkedin: "linkedin.com/in/lena-mueller-berlin" } },
   { id: 2, type: "Co-founder", hasIdea: true, categories: ["healthtech"],
     name: "Dr. Yuki Tanaka", tagline: "Ex-Charité doctor building a digital diagnostics tool for rare diseases.", location: "Berlin",
     tags: ["HealthTech", "AI", "B2B"], lookingFor: "CTO / ML Engineer",
-    meta: [{ label: "Background", value: "Medicine" }, { label: "Stage", value: "Pre-seed" }, { label: "Equity", value: "Open" }] },
+    meta: [{ label: "Background", value: "Medicine" }, { label: "Stage", value: "Pre-seed" }, { label: "Equity", value: "Open" }],
+    contact: { email: "yuki.tanaka@raredx.io", linkedin: "linkedin.com/in/dr-yuki-tanaka" } },
   { id: 3, type: "Co-founder", hasIdea: true, categories: ["spacetech"],
     name: "Nico Braun", tagline: "Aerospace engineer. Building a real-time satellite imagery platform for logistics.", location: "Berlin",
     tags: ["SpaceTech", "Deep Tech", "B2B"], lookingFor: "Business co-founder — enterprise sales",
-    meta: [{ label: "Background", value: "Aerospace" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }] },
+    meta: [{ label: "Background", value: "Aerospace" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
+    contact: { email: "nico.braun@orbitview.space", linkedin: "linkedin.com/in/nico-braun-space" } },
   { id: 4, type: "Co-founder", hasIdea: true, categories: ["climatetech"],
     name: "Sara Kim", tagline: "Ex-Zalando product lead building a carbon footprint tracker for SMEs.", location: "Berlin",
     tags: ["ClimateTech", "SaaS", "B2B"], lookingFor: "Technical co-founder",
-    meta: [{ label: "Background", value: "Product" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }] },
+    meta: [{ label: "Background", value: "Product" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
+    contact: { email: "sara.kim@ecotrace.io", linkedin: "linkedin.com/in/sara-kim-product" } },
   { id: 5, type: "Co-founder", hasIdea: true, categories: ["fintech"],
     name: "Erik Svensson", tagline: "Ex-N26 engineer building embedded insurance for gig-economy workers.", location: "Berlin",
     tags: ["FinTech", "Insurance", "B2C"], lookingFor: "Business co-founder — GTM & partnerships",
-    meta: [{ label: "Skills", value: "Backend / Infra" }, { label: "Stage", value: "Pre-seed" }, { label: "Equity", value: "Open" }] },
+    meta: [{ label: "Skills", value: "Backend / Infra" }, { label: "Stage", value: "Pre-seed" }, { label: "Equity", value: "Open" }],
+    contact: { email: "erik.svensson@gigcover.com", linkedin: "linkedin.com/in/erik-svensson-fintech" } },
   { id: 6, type: "Co-founder", hasIdea: true, categories: ["biotech"],
     name: "Dr. Fatima Al-Hassan", tagline: "Biochemist at FU Berlin spinning out a drug discovery AI from her lab.", location: "Berlin",
     tags: ["Biotech", "AI", "Deep Tech"], lookingFor: "CEO / commercial co-founder",
-    meta: [{ label: "Background", value: "Biochemistry" }, { label: "Stage", value: "Pre-seed" }, { label: "Patents", value: "2" }] },
+    meta: [{ label: "Background", value: "Biochemistry" }, { label: "Stage", value: "Pre-seed" }, { label: "Patents", value: "2" }],
+    contact: { email: "fatima.alhassan@fu-berlin.de", linkedin: "linkedin.com/in/dr-fatima-al-hassan" } },
   { id: 7, type: "Co-founder", hasIdea: true, categories: ["edtech"],
     name: "Marco Rossi", tagline: "Former teacher turned product manager. Building adaptive learning for K-12.", location: "Berlin",
     tags: ["EdTech", "AI", "B2C"], lookingFor: "Technical co-founder — full-stack + AI",
-    meta: [{ label: "Background", value: "Product / Teaching" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }] },
+    meta: [{ label: "Background", value: "Product / Teaching" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }],
+    contact: { email: "marco.rossi@learnloop.io", linkedin: "linkedin.com/in/marco-rossi-edtech" } },
   { id: 8, type: "Co-founder", hasIdea: true, categories: ["hardware"],
     name: "Priya Sharma", tagline: "Robotics engineer. Building affordable exoskeleton aids for elderly care.", location: "Berlin",
     tags: ["Hardware", "HealthTech", "Deep Tech"], lookingFor: "Business co-founder",
-    meta: [{ label: "Background", value: "Robotics" }, { label: "Stage", value: "Prototype" }, { label: "Equity", value: "Open" }] },
+    meta: [{ label: "Background", value: "Robotics" }, { label: "Stage", value: "Prototype" }, { label: "Equity", value: "Open" }],
+    contact: { email: "priya.sharma@exoaid.tech", linkedin: "linkedin.com/in/priya-sharma-robotics" } },
   // No idea
   { id: 9, type: "Co-founder", hasIdea: false, categories: ["ai", "fintech"],
     name: "Max Becker", tagline: "Ex-BCG consultant. Strong in strategy and business development. Ready to go all-in.", location: "Berlin",
     tags: ["Strategy", "FinTech", "AI"], lookingFor: "A founder with a clear problem to solve",
-    meta: [{ label: "Skills", value: "Strategy / Ops" }, { label: "Availability", value: "Full-time" }, { label: "Equity", value: "Open" }] },
+    meta: [{ label: "Skills", value: "Strategy / Ops" }, { label: "Availability", value: "Full-time" }, { label: "Equity", value: "Open" }],
+    contact: { email: "max.becker@gmail.com", linkedin: "linkedin.com/in/max-becker-strategy" } },
   { id: 10, type: "Co-founder", hasIdea: false, categories: ["healthtech", "biotech"],
     name: "Aisha Ndiaye", tagline: "ML engineer, PhD TU Berlin. Wants to work on a hard health or biotech problem.", location: "Berlin",
     tags: ["AI", "HealthTech", "Biotech"], lookingFor: "A founder with a health or biotech idea",
-    meta: [{ label: "Skills", value: "ML / AI" }, { label: "Availability", value: "Part-time" }, { label: "Equity", value: "Open" }] },
+    meta: [{ label: "Skills", value: "ML / AI" }, { label: "Availability", value: "Part-time" }, { label: "Equity", value: "Open" }],
+    contact: { email: "aisha.ndiaye@tu-berlin.de", linkedin: "linkedin.com/in/aisha-ndiaye-ml" } },
   { id: 11, type: "Co-founder", hasIdea: false, categories: ["climatetech", "hardware"],
     name: "Jonas Weber", tagline: "Hardware engineer, 5 years at Bosch. Passionate about climate and energy transition.", location: "Berlin",
     tags: ["ClimateTech", "Hardware", "Deep Tech"], lookingFor: "Founder with a climate or hardware vision",
-    meta: [{ label: "Skills", value: "Hardware / EE" }, { label: "Availability", value: "Full-time" }, { label: "Notice", value: "1 month" }] },
+    meta: [{ label: "Skills", value: "Hardware / EE" }, { label: "Availability", value: "Full-time" }, { label: "Notice", value: "1 month" }],
+    contact: { email: "jonas.weber@protonmail.com", linkedin: "linkedin.com/in/jonas-weber-hardware" } },
   { id: 12, type: "Co-founder", hasIdea: false, categories: ["spacetech", "ai"],
     name: "Elena Petrova", tagline: "Data scientist at DLR. Wants to work on satellite data or AI applications.", location: "Berlin",
     tags: ["SpaceTech", "AI", "Data"], lookingFor: "Founder with a space or AI idea",
-    meta: [{ label: "Skills", value: "Data Science" }, { label: "Availability", value: "Part-time" }, { label: "Equity", value: "Open" }] },
+    meta: [{ label: "Skills", value: "Data Science" }, { label: "Availability", value: "Part-time" }, { label: "Equity", value: "Open" }],
+    contact: { email: "elena.petrova@dlr.de", linkedin: "linkedin.com/in/elena-petrova-dlr" } },
   { id: 13, type: "Co-founder", hasIdea: false, categories: ["fintech", "ai"],
     name: "David Osei", tagline: "Chartered accountant turned software engineer. Interested in fintech or AI automation.", location: "Berlin",
     tags: ["FinTech", "AI", "Accounting"], lookingFor: "Founder with a B2B SaaS idea",
-    meta: [{ label: "Skills", value: "Finance / Engineering" }, { label: "Availability", value: "Full-time" }, { label: "Notice", value: "Immediate" }] },
+    meta: [{ label: "Skills", value: "Finance / Engineering" }, { label: "Availability", value: "Full-time" }, { label: "Notice", value: "Immediate" }],
+    contact: { email: "david.osei@outlook.com", linkedin: "linkedin.com/in/david-osei-fintech" } },
   { id: 14, type: "Co-founder", hasIdea: false, categories: ["edtech", "ai"],
     name: "Hana Nakamura", tagline: "Product designer at Duolingo Berlin. Ready to co-found an AI or EdTech startup.", location: "Berlin",
     tags: ["Design", "EdTech", "AI"], lookingFor: "Technical co-founder with a product vision",
-    meta: [{ label: "Skills", value: "Product Design" }, { label: "Availability", value: "Full-time" }, { label: "Equity", value: "Open" }] },
+    meta: [{ label: "Skills", value: "Product Design" }, { label: "Availability", value: "Full-time" }, { label: "Equity", value: "Open" }],
+    contact: { email: "hana.nakamura@duolingo.com", linkedin: "linkedin.com/in/hana-nakamura-design" } },
 ];
 
 type EventData = {
@@ -223,7 +237,9 @@ function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolea
   );
 }
 
-function ProjectCard({ project }: { project: ProjectData }) {
+function ProjectCard({ project, applied, onApply, onDetails }: {
+  project: ProjectData; applied?: boolean; onApply?: () => void; onDetails?: () => void;
+}) {
   return (
     <div className="border border-white/10 rounded-3xl bg-[#111] px-5 py-4">
       <div className="flex items-start justify-between mb-2">
@@ -231,7 +247,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
         <span className="text-[11px] text-white/30">Due {project.deadline}</span>
       </div>
       <h3 className="text-[18px] font-bold tracking-tight mb-1">{project.name}</h3>
-      <p className="text-sm text-white/50 mb-3 leading-relaxed">{project.description}</p>
+      <p className="text-sm text-white/50 mb-3 leading-relaxed line-clamp-2">{project.description}</p>
       <div className="flex gap-4 mb-3">
         {[["Budget", project.budget], ["People", String(project.peopleRequired)]].map(([label, value]) => (
           <div key={label} className="flex flex-col gap-0.5">
@@ -243,9 +259,22 @@ function ProjectCard({ project }: { project: ProjectData }) {
       <div className="flex flex-wrap gap-1.5 mb-4">
         {project.tags.map((t) => <span key={t} className="text-[11px] text-white/70 border border-white/15 rounded-full px-2.5 py-0.5">{t}</span>)}
       </div>
-      <button className="w-full py-2.5 rounded-2xl border border-white/20 text-sm text-white/70 hover:border-white/40 hover:text-white transition-colors">
-        Apply →
-      </button>
+      <div className="flex gap-2">
+        {onDetails && (
+          <button onClick={onDetails} className="flex-shrink-0 px-4 py-2.5 rounded-2xl border border-white/15 text-sm text-white/50 hover:border-white/30 hover:text-white/80 transition-colors">
+            Details
+          </button>
+        )}
+        {applied ? (
+          <div className="flex-1 py-2.5 rounded-2xl border border-green-500/30 bg-green-500/5 text-sm text-green-400 text-center">
+            ✓ Applied
+          </div>
+        ) : (
+          <button onClick={onApply} className="flex-1 py-2.5 rounded-2xl border border-white/20 text-sm text-white/70 hover:border-white/40 hover:text-white transition-colors">
+            Apply →
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -400,7 +429,10 @@ export default function DiscoverPage() {
   const [cardStack, setCardStack] = useState<CofounderCard[]>(ALL_COFOUNDERS);
   const [connectCount, setConnectCount] = useState(0);
   const [lastAction, setLastAction] = useState<"pass" | "connect" | null>(null);
-  const [joinedEvents, setJoinedEvents] = useState<Set<number>>(new Set());
+  const [joinedEvents, setJoinedEvents] = useState<Set<string>>(new Set());
+  const [appliedProjects, setAppliedProjects] = useState<Set<string>>(new Set());
+  const [selectedCard, setSelectedCard] = useState<CofounderCard | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
 
   // Business state
   const [businessView, setBusinessView] = useState<BusinessView>("home");
@@ -414,6 +446,13 @@ export default function DiscoverPage() {
       const userRole = meta.role as string;
       if (userRole === "admin") { setIsAdmin(true); }
       else { setRole((userRole as RoleKey) ?? "builder"); }
+    });
+    // Load persisted registrations and applications
+    fetch("/api/event-registrations").then((r) => r.json()).then((ids: string[]) => {
+      if (Array.isArray(ids)) setJoinedEvents(new Set(ids.map(String)));
+    });
+    fetch("/api/project-applications").then((r) => r.json()).then((ids: string[]) => {
+      if (Array.isArray(ids)) setAppliedProjects(new Set(ids.map(String)));
     });
   }, []);
 
@@ -489,11 +528,10 @@ export default function DiscoverPage() {
                 <FilterBar hasIdea={ideaFilter} setHasIdea={setIdeaFilter} category={categoryFilter} setCategory={setCategoryFilter} />
                 {currentCard ? (
                   <>
-                    <SwipeCard key={currentCard.id} card={currentCard} onPass={handlePass} onConnect={handleConnect} />
-                    <div className="flex items-center justify-center gap-5 mt-6">
-                      <button onClick={handlePass} className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-red-400/60 hover:text-red-400 transition-colors text-2xl">✕</button>
-                      <button onClick={handleConnect} className="w-[68px] h-[68px] rounded-full bg-white flex items-center justify-center text-[#0a0a0a] hover:bg-white/90 transition-colors text-2xl">♥</button>
-                      <button className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-white/40 transition-colors text-lg">↑</button>
+                    <SwipeCard key={currentCard.id} card={currentCard} onPass={handlePass} onConnect={handleConnect} onCardClick={() => setSelectedCard(currentCard)} />
+                    <div className="flex items-center justify-center gap-8 mt-6">
+                      <button onClick={handlePass} className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-red-400/60 hover:text-red-400 transition-colors text-2xl">✕</button>
+                      <button onClick={handleConnect} className="w-[72px] h-[72px] rounded-full bg-white flex items-center justify-center text-[#0a0a0a] hover:bg-white/90 transition-colors text-3xl">♥</button>
                     </div>
                     <p className="text-center text-[11px] text-white/20 mt-4 tracking-[0.1em] uppercase">{cardStack.length} left · {connectCount} connected</p>
                   </>
@@ -509,15 +547,37 @@ export default function DiscoverPage() {
 
             {builderTab === "Projects" && (
               <div className="flex flex-col gap-4 pb-4">
-                {MOCK_PROJECTS.map((p) => <ProjectCard key={p.id} project={p} />)}
+                {MOCK_PROJECTS.map((p) => (
+                  <ProjectCard key={p.id} project={p}
+                    applied={appliedProjects.has(String(p.id))}
+                    onApply={async () => {
+                      const id = String(p.id);
+                      setAppliedProjects((prev) => new Set([...prev, id]));
+                      await fetch("/api/project-applications", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ project_id: id }),
+                      });
+                    }}
+                    onDetails={() => setSelectedProject(p)}
+                  />
+                ))}
               </div>
             )}
 
             {builderTab === "Events" && (
               <div className="flex flex-col gap-4 pb-4">
                 {EVENTS.map((event) => (
-                  <EventCard key={event.id} event={event} joined={joinedEvents.has(event.id)}
-                    onJoin={() => setJoinedEvents((prev) => new Set([...prev, event.id]))} />
+                  <EventCard key={event.id} event={event} joined={joinedEvents.has(String(event.id))}
+                    onJoin={async () => {
+                      const id = String(event.id);
+                      setJoinedEvents((prev) => new Set([...prev, id]));
+                      await fetch("/api/event-registrations", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ event_id: id }),
+                      });
+                    }} />
                 ))}
               </div>
             )}
@@ -577,6 +637,136 @@ export default function DiscoverPage() {
       )}
 
       <BottomNav />
+
+      {/* Project detail modal */}
+      {selectedProject && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center" onClick={() => setSelectedProject(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-lg bg-[#111] border border-white/12 rounded-t-3xl px-5 pt-5 pb-10 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5" />
+            <div className="flex items-start justify-between mb-3">
+              <span className="text-[10px] tracking-[0.2em] uppercase text-white/40 border border-white/15 rounded-full px-3 py-1">{selectedProject.company}</span>
+              <span className="text-[11px] text-white/30">Due {selectedProject.deadline}</span>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight mb-2">{selectedProject.name}</h2>
+            <p className="text-sm text-white/60 leading-relaxed mb-5">{selectedProject.description}</p>
+            <div className="h-px bg-white/8 mb-5" />
+            <div className="flex gap-6 flex-wrap mb-5">
+              {[["Budget", selectedProject.budget], ["People needed", String(selectedProject.peopleRequired)]].map(([label, value]) => (
+                <div key={label} className="flex flex-col gap-0.5">
+                  <span className="text-[9px] tracking-[0.2em] uppercase text-white/35">{label}</span>
+                  <span className="text-[13px] font-medium text-white">{value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-6">
+              {selectedProject.tags.map((t) => <span key={t} className="text-[11px] text-white/70 border border-white/15 rounded-full px-2.5 py-0.5">{t}</span>)}
+            </div>
+            {appliedProjects.has(String(selectedProject.id)) ? (
+              <div className="w-full py-3.5 rounded-2xl border border-green-500/30 bg-green-500/5 text-sm text-green-400 text-center">✓ Application sent</div>
+            ) : (
+              <button onClick={async () => {
+                const id = String(selectedProject.id);
+                setAppliedProjects((prev) => new Set([...prev, id]));
+                await fetch("/api/project-applications", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ project_id: id }),
+                });
+                setSelectedProject(null);
+              }} className="w-full py-3.5 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold hover:bg-white/90 transition-colors">
+                Apply →
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Profile detail modal */}
+      {selectedCard && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center" onClick={() => setSelectedCard(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-lg bg-[#111] border border-white/12 rounded-t-3xl px-5 pt-5 pb-10 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag handle */}
+            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5" />
+
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <span className="text-[10px] tracking-[0.25em] uppercase text-white/40 border border-white/15 rounded-full px-3 py-1">{selectedCard.type}</span>
+              <span className="text-[11px] text-white/40">📍 {selectedCard.location}</span>
+            </div>
+
+            <h2 className="text-2xl font-bold tracking-tight mb-1">{selectedCard.name}</h2>
+            <p className="text-sm text-white/55 leading-relaxed mb-5">{selectedCard.tagline}</p>
+
+            <div className="h-px bg-white/8 mb-5" />
+
+            {/* Meta */}
+            <div className="flex gap-6 flex-wrap mb-5">
+              {selectedCard.meta.map(({ label, value }) => (
+                <div key={label} className="flex flex-col gap-0.5">
+                  <span className="text-[9px] tracking-[0.2em] uppercase text-white/35">{label}</span>
+                  <span className="text-[13px] font-medium text-white">{value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-1.5 mb-5">
+              {selectedCard.tags.map((tag) => (
+                <span key={tag} className="text-[11px] text-white/70 border border-white/15 rounded-full px-2.5 py-0.5">{tag}</span>
+              ))}
+            </div>
+
+            {/* Looking for */}
+            <div className="bg-white/[0.04] border border-white/8 rounded-xl px-3.5 py-3 mb-5">
+              <p className="text-[9px] tracking-[0.2em] uppercase text-white/35 mb-1">Looking for</p>
+              <p className="text-[13px] font-medium text-white/85">{selectedCard.lookingFor}</p>
+            </div>
+
+            {/* Contact */}
+            {selectedCard.contact && (
+              <div className="bg-white/[0.04] border border-white/8 rounded-xl px-3.5 py-4 mb-6">
+                <p className="text-[9px] tracking-[0.2em] uppercase text-white/35 mb-3">Contact</p>
+                <div className="flex flex-col gap-2.5">
+                  {selectedCard.contact.email && (
+                    <a href={`mailto:${selectedCard.contact.email}`}
+                      className="flex items-center gap-2.5 text-sm text-white/80 hover:text-white transition-colors">
+                      <span className="text-base">✉️</span>
+                      <span className="font-mono text-[13px]">{selectedCard.contact.email}</span>
+                    </a>
+                  )}
+                  {selectedCard.contact.linkedin && (
+                    <a href={`https://${selectedCard.contact.linkedin}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2.5 text-sm text-white/80 hover:text-white transition-colors">
+                      <span className="text-base">🔗</span>
+                      <span className="text-[13px]">{selectedCard.contact.linkedin}</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex gap-3">
+              <button onClick={() => { handlePass(); setSelectedCard(null); }}
+                className="flex-1 py-3.5 rounded-2xl border border-white/15 text-sm text-white/50 hover:border-red-400/50 hover:text-red-400 transition-colors">
+                Decline
+              </button>
+              <button onClick={() => { handleConnect(); setSelectedCard(null); }}
+                className="flex-1 py-3.5 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold hover:bg-white/90 transition-colors">
+                Match ♥
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

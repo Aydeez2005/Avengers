@@ -15,39 +15,32 @@ function makeClient(cookieStore: Awaited<ReturnType<typeof cookies>>) {
   );
 }
 
-export async function GET(request: NextRequest) {
+// GET /api/project-applications — returns project_ids this user has applied to
+export async function GET() {
   const supabase = makeClient(await cookies());
-  const mine = new URL(request.url).searchParams.get("mine") === "true";
-  let query = supabase.from("events").select("*").order("date", { ascending: true });
-  if (mine) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json([]);
-    query = query.eq("created_by", user.id);
-  }
-  const { data, error } = await query;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json([]);
+
+  const { data, error } = await supabase
+    .from("project_applications")
+    .select("project_id")
+    .eq("user_id", user.id);
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json((data ?? []).map((r: { project_id: string }) => r.project_id));
 }
 
+// POST /api/project-applications — apply to a project
 export async function POST(request: NextRequest) {
   const supabase = makeClient(await cookies());
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
-  const { data, error } = await supabase.from("events").insert({
-    created_by: user.id,
-    name: body.name,
-    organiser: user.user_metadata?.full_name ?? "",
-    date: body.date,
-    time: body.time ?? "",
-    location: body.location,
-    topic: body.topic,
-    tags: body.topic ? [body.topic] : [],
-    description: body.description ?? "",
-    luma_url: body.luma_url ?? null,
-  }).select().single();
+  const { project_id, message } = await request.json();
+  const { error } = await supabase
+    .from("project_applications")
+    .upsert({ user_id: user.id, project_id, message: message ?? null }, { onConflict: "user_id,project_id" });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json({ ok: true });
 }
