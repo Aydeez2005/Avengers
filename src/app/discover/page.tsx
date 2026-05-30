@@ -5,213 +5,148 @@ import BottomNav from "@/components/BottomNav";
 import SwipeCard, { CardData } from "@/components/SwipeCard";
 import { supabase } from "@/lib/supabase";
 
-// ── Types ──────────────────────────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────────────────────
 
-export type EventData = {
-  id: number;
-  name: string;
-  organiser: string;
-  date: string;
-  time: string;
-  location: string;
-  tags: string[];
-  description: string;
-  attendees: number;
-};
-
-type RoleKey = "builder" | "startup";
-type Tab = "Co-founders" | "Events" | "Projects" | "Find Talent";
-
-const ROLE_TABS: Record<RoleKey, Tab[]> = {
-  builder: ["Co-founders", "Projects", "Events"],
-  startup: ["Find Talent", "Events"],
-};
-
-const ROLE_LABELS: Record<RoleKey, string> = {
-  builder: "Builder",
-  startup: "Startup",
-};
+const CATEGORIES = [
+  { id: "all",        label: "All" },
+  { id: "ai",         label: "AI" },
+  { id: "healthtech", label: "HealthTech" },
+  { id: "spacetech",  label: "SpaceTech" },
+  { id: "climatetech",label: "ClimateTech" },
+  { id: "fintech",    label: "FinTech" },
+  { id: "biotech",    label: "Biotech" },
+  { id: "hardware",   label: "Hardware" },
+  { id: "edtech",     label: "EdTech" },
+];
 
 // ── Mock data ──────────────────────────────────────────────────────────────
 
-const COFOUNDERS: CardData[] = [
-  {
-    id: 101,
-    type: "Co-founder",
-    name: "Lena Müller",
-    tagline: "Full-stack engineer with 4 years at Zalando. Ready to go all-in on a B2B SaaS idea.",
-    location: "Berlin",
-    tags: ["Engineering", "B2B SaaS", "Fintech"],
-    lookingFor: "A visionary founder with a problem worth solving",
-    meta: [
-      { label: "Skills", value: "Full-stack" },
-      { label: "Availability", value: "Full-time" },
-      { label: "Equity", value: "Open" },
-    ],
-  },
-  {
-    id: 102,
-    type: "Co-founder",
-    name: "Max Becker",
-    tagline: "Ex-BCG consultant, domain expert in healthcare. Looking for a technical co-founder.",
-    location: "Berlin",
-    tags: ["HealthTech", "Strategy", "B2B"],
-    lookingFor: "Technical co-founder to build together",
-    meta: [
-      { label: "Background", value: "Consulting" },
-      { label: "Availability", value: "Full-time" },
-      { label: "Equity", value: "50/50" },
-    ],
-  },
-  {
-    id: 103,
-    type: "Co-founder",
-    name: "Aisha Ndiaye",
-    tagline: "ML engineer, PhD in Computer Vision from TU Berlin. Looking for a business co-founder.",
-    location: "Berlin",
-    tags: ["AI / ML", "Deep Tech", "Computer Vision"],
-    lookingFor: "Business co-founder to commercialise AI research",
-    meta: [
-      { label: "Skills", value: "ML / AI" },
-      { label: "Availability", value: "Part-time" },
-      { label: "Equity", value: "Open" },
-    ],
-  },
+type CofounderCard = CardData & { hasIdea: boolean; categories: string[] };
+
+const ALL_COFOUNDERS: CofounderCard[] = [
+  { id: 1, type: "Co-founder", hasIdea: true, categories: ["ai"],
+    name: "Lena Müller", tagline: "Building an AI-powered legal contract tool. Need a business co-founder.", location: "Berlin",
+    tags: ["AI", "LegalTech", "B2B"], lookingFor: "Business co-founder — sales & GTM",
+    meta: [{ label: "Skills", value: "ML / Full-stack" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }] },
+  { id: 2, type: "Co-founder", hasIdea: true, categories: ["healthtech"],
+    name: "Dr. Yuki Tanaka", tagline: "Ex-Charité doctor with a digital diagnostics idea. Need a technical co-founder.", location: "Berlin",
+    tags: ["HealthTech", "AI", "B2B"], lookingFor: "CTO / ML Engineer",
+    meta: [{ label: "Background", value: "Medicine" }, { label: "Stage", value: "Pre-seed" }, { label: "Equity", value: "Open" }] },
+  { id: 3, type: "Co-founder", hasIdea: true, categories: ["spacetech"],
+    name: "Nico Braun", tagline: "Aerospace engineer with a satellite data startup idea. Looking for a business partner.", location: "Berlin",
+    tags: ["SpaceTech", "Deep Tech", "B2B"], lookingFor: "Business co-founder",
+    meta: [{ label: "Background", value: "Aerospace" }, { label: "Stage", value: "Idea" }, { label: "Equity", value: "50/50" }] },
+  { id: 4, type: "Co-founder", hasIdea: false, categories: ["ai", "fintech"],
+    name: "Max Becker", tagline: "Ex-BCG consultant. Strong in strategy and ops. Looking for a founder with an idea.", location: "Berlin",
+    tags: ["Strategy", "FinTech", "AI"], lookingFor: "A founder with a problem worth solving",
+    meta: [{ label: "Skills", value: "Strategy / Ops" }, { label: "Availability", value: "Full-time" }, { label: "Equity", value: "Open" }] },
+  { id: 5, type: "Co-founder", hasIdea: false, categories: ["healthtech", "biotech"],
+    name: "Aisha Ndiaye", tagline: "ML engineer, PhD from TU Berlin. Passionate about health and biotech applications.", location: "Berlin",
+    tags: ["AI", "HealthTech", "Biotech"], lookingFor: "A founder with a health or biotech idea",
+    meta: [{ label: "Skills", value: "ML / AI" }, { label: "Availability", value: "Part-time" }, { label: "Equity", value: "Open" }] },
+  { id: 6, type: "Co-founder", hasIdea: false, categories: ["climatetech", "hardware"],
+    name: "Jonas Weber", tagline: "Hardware engineer with 5 years at Bosch. Interested in climate and clean energy.", location: "Berlin",
+    tags: ["ClimateTech", "Hardware", "Deep Tech"], lookingFor: "Founder with a climate or hardware idea",
+    meta: [{ label: "Skills", value: "Hardware / EE" }, { label: "Availability", value: "Full-time" }, { label: "Notice", value: "1 month" }] },
 ];
 
-const PROJECTS: CardData[] = [
-  {
-    id: 201,
-    type: "Startup",
-    name: "Clausify",
-    tagline: "AI that reads contracts so lawyers don't have to",
-    location: "Berlin",
-    tags: ["AI / ML", "LegalTech", "B2B SaaS"],
-    lookingFor: "ML Engineer — part-time or internship",
-    meta: [
-      { label: "Stage", value: "Pre-seed" },
-      { label: "Team", value: "2 founders" },
-      { label: "Pay", value: "Paid" },
-    ],
-  },
-  {
-    id: 202,
-    type: "Startup",
-    name: "Rootly",
-    tagline: "Making urban farming accessible for apartment dwellers across Europe",
-    location: "Berlin",
-    tags: ["AgriTech", "Consumer", "Hardware"],
-    lookingFor: "Growth / Marketing — 20h/week",
-    meta: [
-      { label: "Stage", value: "Seed" },
-      { label: "Team", value: "4 people" },
-      { label: "Revenue", value: "€12k MRR" },
-    ],
-  },
-];
-
-
-const TALENT: CardData[] = [
-  {
-    id: 401,
-    type: "Co-founder",
-    name: "Jonas Weber",
-    tagline: "Ex-McKinsey, 5 years in product strategy. Looking for an ambitious team to join.",
-    location: "Berlin",
-    tags: ["Strategy", "Product", "B2B"],
-    lookingFor: "Challenging role at an early-stage startup",
-    meta: [
-      { label: "Background", value: "Consulting" },
-      { label: "Availability", value: "Full-time" },
-      { label: "Notice", value: "1 month" },
-    ],
-  },
-  {
-    id: 402,
-    type: "Student",
-    name: "Kai Hoffmann",
-    tagline: "MSc CS @ TU Berlin, specialising in distributed systems. Open to startup roles.",
-    location: "Berlin",
-    tags: ["Backend", "Systems", "Python / Go"],
-    lookingFor: "Engineering role at a mission-driven startup",
-    meta: [
-      { label: "University", value: "TU Berlin" },
-      { label: "Availability", value: "Part-time" },
-      { label: "Graduation", value: "Dec 2026" },
-    ],
-  },
-];
+type EventData = {
+  id: number; name: string; organiser: string; type: "Hackathon" | "Workshop" | "Meetup" | "Conference";
+  date: string; time: string; location: string; tags: string[]; description: string; spots: number;
+};
 
 const EVENTS: EventData[] = [
-  {
-    id: 501,
-    name: "BAD1 Demo Night",
-    organiser: "BAD1",
-    date: "31 May 2026",
-    time: "18:00",
-    location: "Factory Berlin, Mitte",
-    tags: ["Startup", "Demo", "Networking"],
-    description: "The flagship BAD1 event. Startups pitch, builders connect, deals get made.",
-    attendees: 340,
-  },
-  {
-    id: 502,
-    name: "Founder Breakfast",
-    organiser: "Berlin Founders Club",
-    date: "5 June 2026",
-    time: "08:30",
-    location: "Soho House Berlin",
-    tags: ["Founders", "Early Stage", "Breakfast"],
-    description: "Intimate breakfast for early-stage founders. Max 30 people, deep conversations.",
-    attendees: 28,
-  },
-  {
-    id: 503,
-    name: "Deep Tech Meetup",
-    organiser: "Berlin Deep Tech",
-    date: "12 June 2026",
-    time: "19:00",
-    location: "TU Berlin, Main Building",
-    tags: ["Deep Tech", "Quantum", "Hardware"],
-    description: "Researchers and founders connecting around hard problems in quantum, robotics, and materials.",
-    attendees: 120,
-  },
+  { id: 1, name: "BAD1 Hackathon", organiser: "BAD1", type: "Hackathon",
+    date: "31 May 2026", time: "09:00", location: "Factory Berlin, Mitte",
+    tags: ["AI", "ClimateTech", "FinTech"], description: "48-hour hackathon. Build a product from scratch with a team you meet on the day.",
+    spots: 120 },
+  { id: 2, name: "Founder AI Workshop", organiser: "Berlin Founders Club", type: "Workshop",
+    date: "7 June 2026", time: "10:00", location: "Soho House Berlin",
+    tags: ["AI", "Product"], description: "Hands-on workshop on integrating AI into your startup — from prototype to production.",
+    spots: 30 },
+  { id: 3, name: "SpaceTech Meetup Berlin", organiser: "Berlin Deep Tech", type: "Meetup",
+    date: "14 June 2026", time: "19:00", location: "TU Berlin, Main Building",
+    tags: ["SpaceTech", "Deep Tech", "Hardware"], description: "Founders, researchers, and engineers building for space come together.",
+    spots: 80 },
+  { id: 4, name: "HealthTech Demo Day", organiser: "Charité Innovation Hub", type: "Conference",
+    date: "21 June 2026", time: "14:00", location: "Charité Campus Mitte",
+    tags: ["HealthTech", "Biotech"], description: "Startups from the Charité ecosystem present their latest health and biotech demos.",
+    spots: 200 },
 ];
 
-const CARDS_BY_TAB: Partial<Record<Tab, CardData[]>> = {
-  "Co-founders": COFOUNDERS,
-  "Projects":    PROJECTS,
-  "Find Talent": TALENT,
+type ProjectData = {
+  id: number; company: string; name: string; description: string;
+  deadline: string; budget: string; peopleRequired: number; tags: string[];
 };
+
+const MOCK_PROJECTS: ProjectData[] = [
+  { id: 1, company: "Clausify", name: "ML Contract Parser", description: "Build an NLP pipeline to extract key clauses from legal documents.",
+    deadline: "30 June 2026", budget: "€3,000", peopleRequired: 2, tags: ["AI", "NLP", "Python"] },
+  { id: 2, company: "Rootly", name: "IoT Sensor Dashboard", description: "Build a real-time dashboard for urban farming sensor data.",
+    deadline: "15 July 2026", budget: "€2,000", peopleRequired: 1, tags: ["IoT", "React", "Hardware"] },
+];
 
 // ── Sub-components ─────────────────────────────────────────────────────────
 
-function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolean; onJoin: () => void }) {
-  if (joined) {
-    return (
-      <div className="border border-green-500/30 bg-green-500/5 rounded-3xl px-5 py-4 flex items-center gap-3">
-        <span className="text-green-400 text-lg">✓</span>
-        <div>
-          <p className="text-sm font-semibold text-white">{event.name}</p>
-          <p className="text-xs text-white/40">{event.date} · {event.time}</p>
-        </div>
+function FilterBar({ hasIdea, setHasIdea, category, setCategory }: {
+  hasIdea: boolean | null; setHasIdea: (v: boolean | null) => void;
+  category: string; setCategory: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 mb-3">
+      {/* Has idea toggle */}
+      <div className="flex gap-2">
+        {[{ val: null, label: "Everyone" }, { val: true, label: "💡 Has idea" }, { val: false, label: "🔍 No idea" }].map((opt) => (
+          <button key={String(opt.val)} onClick={() => setHasIdea(opt.val as boolean | null)}
+            className={`flex-shrink-0 text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded-full border transition-colors ${
+              hasIdea === opt.val ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"
+            }`}>
+            {opt.label}
+          </button>
+        ))}
       </div>
-    );
-  }
+      {/* Category chips */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        {CATEGORIES.map((cat) => (
+          <button key={cat.id} onClick={() => setCategory(cat.id)}
+            className={`flex-shrink-0 text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 rounded-full border transition-colors ${
+              category === cat.id ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"
+            }`}>
+            {cat.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const EVENT_TYPE_EMOJI: Record<string, string> = { Hackathon: "⚡", Workshop: "🛠️", Meetup: "🤝", Conference: "🎤" };
+
+function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolean; onJoin: () => void }) {
+  if (joined) return (
+    <div className="border border-green-500/30 bg-green-500/5 rounded-3xl px-5 py-4 flex items-center gap-3">
+      <span className="text-green-400 text-lg">✓</span>
+      <div>
+        <p className="text-sm font-semibold text-white">{event.name}</p>
+        <p className="text-xs text-white/40">{event.date} · {event.time}</p>
+      </div>
+    </div>
+  );
   return (
     <div className="border border-white/10 rounded-3xl bg-[#111] overflow-hidden">
-      <div className="px-5 pt-5 pb-4">
+      <div className="px-5 pt-5 pb-3">
         <div className="flex items-start justify-between mb-3">
-          <span className="text-[10px] tracking-[0.25em] uppercase text-white/40 border border-white/15 rounded-full px-3 py-1">
-            {event.organiser}
+          <span className="text-[10px] tracking-[0.2em] uppercase text-white/40 border border-white/15 rounded-full px-3 py-1">
+            {EVENT_TYPE_EMOJI[event.type]} {event.type}
           </span>
           <span className="text-[11px] text-white/40">📍 {event.location.split(",")[0]}</span>
         </div>
-        <h2 className="text-[22px] font-bold tracking-tight leading-tight mb-1">{event.name}</h2>
+        <h2 className="text-[20px] font-bold tracking-tight leading-tight mb-1">{event.name}</h2>
+        <p className="text-xs text-white/40 mb-1">{event.organiser}</p>
         <p className="text-sm text-white/50 leading-relaxed">{event.description}</p>
       </div>
-      <div className="flex gap-5 px-5 pb-4">
-        {[["Date", event.date], ["Time", event.time], ["Going", String(event.attendees)]].map(([label, value]) => (
+      <div className="flex gap-5 px-5 pb-3">
+        {[["Date", event.date], ["Time", event.time], ["Spots", String(event.spots)]].map(([label, value]) => (
           <div key={label} className="flex flex-col gap-0.5">
             <span className="text-[9px] tracking-[0.2em] uppercase text-white/35">{label}</span>
             <span className="text-[13px] font-medium text-white">{value}</span>
@@ -219,105 +154,184 @@ function EventCard({ event, joined, onJoin }: { event: EventData; joined: boolea
         ))}
       </div>
       <div className="flex flex-wrap gap-1.5 px-5 pb-4">
-        {event.tags.map((tag) => (
-          <span key={tag} className="text-[11px] text-white/70 border border-white/15 rounded-full px-2.5 py-0.5">{tag}</span>
-        ))}
+        {event.tags.map((tag) => <span key={tag} className="text-[11px] text-white/70 border border-white/15 rounded-full px-2.5 py-0.5">{tag}</span>)}
       </div>
       <div className="px-5 pb-5">
-        <button onClick={onJoin} className="w-full py-3 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold tracking-wide hover:bg-white/90 transition-colors">
-          Join event →
+        <button onClick={onJoin} className="w-full py-3 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold hover:bg-white/90 transition-colors">
+          Register →
         </button>
       </div>
     </div>
   );
 }
 
+function ProjectCard({ project }: { project: ProjectData }) {
+  return (
+    <div className="border border-white/10 rounded-3xl bg-[#111] px-5 py-4">
+      <div className="flex items-start justify-between mb-2">
+        <span className="text-[10px] tracking-[0.2em] uppercase text-white/40 border border-white/15 rounded-full px-3 py-1">{project.company}</span>
+        <span className="text-[11px] text-white/30">Due {project.deadline}</span>
+      </div>
+      <h3 className="text-[18px] font-bold tracking-tight mb-1">{project.name}</h3>
+      <p className="text-sm text-white/50 mb-3 leading-relaxed">{project.description}</p>
+      <div className="flex gap-4 mb-3">
+        {[["Budget", project.budget], ["People", String(project.peopleRequired)]].map(([label, value]) => (
+          <div key={label} className="flex flex-col gap-0.5">
+            <span className="text-[9px] tracking-[0.2em] uppercase text-white/35">{label}</span>
+            <span className="text-[13px] font-medium text-white">{value}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {project.tags.map((t) => <span key={t} className="text-[11px] text-white/70 border border-white/15 rounded-full px-2.5 py-0.5">{t}</span>)}
+      </div>
+      <button className="w-full py-2.5 rounded-2xl border border-white/20 text-sm text-white/70 hover:border-white/40 hover:text-white transition-colors">
+        Apply →
+      </button>
+    </div>
+  );
+}
+
+// ── Business: Post form ────────────────────────────────────────────────────
+
+function PostProjectForm({ onDone }: { onDone: () => void }) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [budget, setBudget] = useState("");
+  const [people, setPeople] = useState("");
+
+  return (
+    <div className="flex flex-col gap-3 pb-6">
+      <h2 className="text-xl font-bold tracking-tight mb-1">Post a project</h2>
+      <p className="text-sm text-white/40 mb-2">Builders will browse and apply.</p>
+      {[
+        { placeholder: "Project name", value: name, set: setName },
+        { placeholder: "Short description", value: description, set: setDescription },
+        { placeholder: "Deadline (e.g. 30 June 2026)", value: deadline, set: setDeadline },
+        { placeholder: "Budget (e.g. €2,000)", value: budget, set: setBudget },
+        { placeholder: "People required (e.g. 2)", value: people, set: setPeople },
+      ].map(({ placeholder, value, set }) => (
+        <input key={placeholder} type="text" placeholder={placeholder} value={value} onChange={(e) => set(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+      ))}
+      <div className="h-px bg-white/6 my-2" />
+      <button onClick={onDone} disabled={!name || !description || !deadline || !budget || !people}
+        className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
+        Post project →
+      </button>
+      <button onClick={onDone} className="text-center text-sm text-white/30 hover:text-white/60 transition-colors">Cancel</button>
+    </div>
+  );
+}
+
+function CreateEventForm({ onDone }: { onDone: () => void }) {
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
+  const [date, setDate] = useState("");
+  const [topic, setTopic] = useState("");
+
+  return (
+    <div className="flex flex-col gap-3 pb-6">
+      <h2 className="text-xl font-bold tracking-tight mb-1">Create an event</h2>
+      <p className="text-sm text-white/40 mb-2">Workshops, hackathons, meetups — anything goes.</p>
+      {[
+        { placeholder: "Event name", value: name, set: setName },
+        { placeholder: "Location", value: location, set: setLocation },
+        { placeholder: "Date (e.g. 15 July 2026)", value: date, set: setDate },
+        { placeholder: "Topic (e.g. AI, HealthTech…)", value: topic, set: setTopic },
+      ].map(({ placeholder, value, set }) => (
+        <input key={placeholder} type="text" placeholder={placeholder} value={value} onChange={(e) => set(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+      ))}
+      <div className="h-px bg-white/6 my-2" />
+      <button onClick={onDone} disabled={!name || !location || !date || !topic}
+        className="w-full py-4 rounded-2xl bg-white text-[#0a0a0a] text-sm font-semibold disabled:opacity-30 hover:opacity-90 transition-opacity">
+        Create event →
+      </button>
+      <button onClick={onDone} className="text-center text-sm text-white/30 hover:text-white/60 transition-colors">Cancel</button>
+    </div>
+  );
+}
+
 // ── Main page ──────────────────────────────────────────────────────────────
 
+type RoleKey = "builder" | "business";
+type BuilderTab = "Co-founders" | "Events";
+type BusinessView = "home" | "post-project" | "create-event";
+
 export default function DiscoverPage() {
-  const [role, setRole] = useState<RoleKey | null>(null);
+  const [role, setRole] = useState<RoleKey>("builder");
   const [isAdmin, setIsAdmin] = useState(false);
   const [viewingAs, setViewingAs] = useState<RoleKey>("builder");
-  const [activeTab, setActiveTab] = useState<Tab>("Co-founders");
-  const [cardStacks, setCardStacks] = useState<Record<Tab, CardData[]>>({
-    "Co-founders": COFOUNDERS,
-    "Projects":    PROJECTS,
-    "Find Talent": TALENT,
-    "Events":      [],
-  });
-  const [connectCounts, setConnectCounts] = useState<Record<Tab, number>>({
-    "Co-founders": 0, "Projects": 0, "Find Talent": 0, "Events": 0,
-  });
-  const [joinedEvents, setJoinedEvents] = useState<Set<number>>(new Set());
-  const [lastAction, setLastAction] = useState<"pass" | "connect" | null>(null);
   const [userInitial, setUserInitial] = useState("·");
+
+  // Builder state
+  const [builderTab, setBuilderTab] = useState<BuilderTab>("Co-founders");
+  const [ideaFilter, setIdeaFilter] = useState<boolean | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [cardStack, setCardStack] = useState<CofounderCard[]>(ALL_COFOUNDERS);
+  const [connectCount, setConnectCount] = useState(0);
+  const [lastAction, setLastAction] = useState<"pass" | "connect" | null>(null);
+  const [joinedEvents, setJoinedEvents] = useState<Set<number>>(new Set());
+
+  // Business state
+  const [businessView, setBusinessView] = useState<BusinessView>("home");
+  const [postedProjects, setPostedProjects] = useState<ProjectData[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata ?? {};
       const name = meta.full_name ?? data.user?.email ?? "";
       if (name) setUserInitial(name[0].toUpperCase());
-
       const userRole = meta.role as string;
-      if (userRole === "admin") {
-        setIsAdmin(true);
-        setViewingAs("builder");
-      } else {
-        setRole((userRole as RoleKey) ?? "builder");
-      }
+      if (userRole === "admin") { setIsAdmin(true); }
+      else { setRole((userRole as RoleKey) ?? "builder"); }
     });
   }, []);
 
-  const effectiveRole: RoleKey = isAdmin ? viewingAs : (role ?? "builder");
-  const tabs = ROLE_TABS[effectiveRole];
-
-  // Reset to first tab when effective role changes
+  // Recompute filtered cards when filters change
   useEffect(() => {
-    setActiveTab(ROLE_TABS[effectiveRole][0]);
-  }, [effectiveRole]);
+    let filtered = ALL_COFOUNDERS;
+    if (ideaFilter !== null) filtered = filtered.filter((c) => c.hasIdea === ideaFilter);
+    if (categoryFilter !== "all") filtered = filtered.filter((c) => c.categories.includes(categoryFilter));
+    setCardStack(filtered);
+  }, [ideaFilter, categoryFilter]);
+
+  const effectiveRole: RoleKey = isAdmin ? viewingAs : role;
+  const currentCard = cardStack[0];
 
   function handlePass() {
     setLastAction("pass");
-    setCardStacks((prev) => ({ ...prev, [activeTab]: prev[activeTab].slice(1) }));
+    setCardStack((prev) => prev.slice(1));
     setTimeout(() => setLastAction(null), 800);
   }
 
   function handleConnect() {
     setLastAction("connect");
-    setConnectCounts((prev) => ({ ...prev, [activeTab]: prev[activeTab] + 1 }));
-    setCardStacks((prev) => ({ ...prev, [activeTab]: prev[activeTab].slice(1) }));
+    setConnectCount((c) => c + 1);
+    setCardStack((prev) => prev.slice(1));
     setTimeout(() => setLastAction(null), 800);
   }
-
-  const currentCard = activeTab !== "Events" ? cardStacks[activeTab]?.[0] : undefined;
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex flex-col pb-24">
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 pt-5 pb-2">
         <span className="text-xs font-bold tracking-[0.25em] uppercase text-white/90">Scout</span>
-        <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-sm">
-          {userInitial}
-        </div>
+        <div className="w-8 h-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-sm">{userInitial}</div>
       </div>
 
-      {/* Admin role switcher */}
+      {/* Admin switcher */}
       {isAdmin && (
         <div className="px-5 pb-2">
           <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-2xl px-3 py-2">
             <span className="text-[10px] tracking-[0.2em] uppercase text-white/30 flex-shrink-0">Viewing as</span>
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-              {(Object.keys(ROLE_LABELS) as RoleKey[]).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setViewingAs(r)}
-                  className={`flex-shrink-0 text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 rounded-full border transition-colors ${
-                    viewingAs === r
-                      ? "border-white/50 bg-white/10 text-white"
-                      : "border-white/10 text-white/35 hover:text-white/60"
-                  }`}
-                >
-                  {ROLE_LABELS[r]}
+            <div className="flex gap-1.5">
+              {(["builder", "business"] as RoleKey[]).map((r) => (
+                <button key={r} onClick={() => setViewingAs(r)}
+                  className={`flex-shrink-0 text-[10px] tracking-[0.1em] uppercase px-2.5 py-1 rounded-full border transition-colors ${viewingAs === r ? "border-white/50 bg-white/10 text-white" : "border-white/10 text-white/35 hover:text-white/60"}`}>
+                  {r}
                 </button>
               ))}
             </div>
@@ -325,79 +339,109 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {/* Mode tabs */}
-      <div className="flex gap-2 px-5 pb-3 overflow-x-auto no-scrollbar">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-shrink-0 text-[11px] tracking-[0.15em] uppercase px-3.5 py-1.5 rounded-full border transition-colors ${
-              activeTab === tab
-                ? "border-white/60 text-white bg-white/10"
-                : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Connect flash */}
-      {lastAction === "connect" && (
-        <div className="mx-6 mb-3 bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-2.5 text-sm text-green-400 text-center animate-pulse">
-          ✓ Connected!
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="flex-1 flex flex-col px-5 pt-2">
-
-        {/* Swipeable tabs */}
-        {activeTab !== "Events" && (
-          currentCard ? (
-            <>
-              <SwipeCard
-                key={currentCard.id}
-                card={currentCard}
-                onPass={handlePass}
-                onConnect={handleConnect}
-              />
-              <div className="flex items-center justify-center gap-5 mt-6">
-                <button onClick={handlePass} className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-red-400/60 hover:text-red-400 transition-colors text-2xl">✕</button>
-                <button onClick={handleConnect} className="w-[68px] h-[68px] rounded-full bg-white flex items-center justify-center text-[#0a0a0a] hover:bg-white/90 transition-colors text-2xl">♥</button>
-                <button className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-white/40 transition-colors text-lg">↑</button>
-              </div>
-              <p className="text-center text-[11px] text-white/20 mt-4 tracking-[0.1em] uppercase">
-                {cardStacks[activeTab].length} left · {connectCounts[activeTab]} connected
-              </p>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
-              <div className="text-4xl">🎉</div>
-              <h2 className="text-xl font-bold tracking-tight">You&apos;re all caught up</h2>
-              <p className="text-sm text-white/40">
-                {connectCounts[activeTab] > 0
-                  ? `You connected with ${connectCounts[activeTab]} people. Check your matches!`
-                  : "No more profiles for now. Check back soon."}
-              </p>
-            </div>
-          )
-        )}
-
-        {/* Events tab */}
-        {activeTab === "Events" && (
-          <div className="flex flex-col gap-4 pb-4">
-            {EVENTS.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                joined={joinedEvents.has(event.id)}
-                onJoin={() => setJoinedEvents((prev) => new Set([...prev, event.id]))}
-              />
+      {/* ── Builder view ── */}
+      {effectiveRole === "builder" && (
+        <>
+          {/* Tabs */}
+          <div className="flex gap-2 px-5 pb-2 overflow-x-auto no-scrollbar">
+            {(["Co-founders", "Events"] as BuilderTab[]).map((tab) => (
+              <button key={tab} onClick={() => setBuilderTab(tab)}
+                className={`flex-shrink-0 text-[11px] tracking-[0.15em] uppercase px-3.5 py-1.5 rounded-full border transition-colors ${builderTab === tab ? "border-white/60 text-white bg-white/10" : "border-white/15 text-white/40 hover:text-white/70 hover:border-white/30"}`}>
+                {tab}
+              </button>
             ))}
           </div>
-        )}
-      </div>
+
+          {lastAction === "connect" && (
+            <div className="mx-6 mb-3 bg-green-500/10 border border-green-500/30 rounded-xl px-4 py-2.5 text-sm text-green-400 text-center animate-pulse">✓ Connected!</div>
+          )}
+
+          <div className="flex-1 flex flex-col px-5 pt-1">
+            {builderTab === "Co-founders" && (
+              <>
+                <FilterBar hasIdea={ideaFilter} setHasIdea={setIdeaFilter} category={categoryFilter} setCategory={setCategoryFilter} />
+                {currentCard ? (
+                  <>
+                    <SwipeCard key={currentCard.id} card={currentCard} onPass={handlePass} onConnect={handleConnect} />
+                    <div className="flex items-center justify-center gap-5 mt-6">
+                      <button onClick={handlePass} className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-red-400/60 hover:text-red-400 transition-colors text-2xl">✕</button>
+                      <button onClick={handleConnect} className="w-[68px] h-[68px] rounded-full bg-white flex items-center justify-center text-[#0a0a0a] hover:bg-white/90 transition-colors text-2xl">♥</button>
+                      <button className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white/50 hover:border-white/40 transition-colors text-lg">↑</button>
+                    </div>
+                    <p className="text-center text-[11px] text-white/20 mt-4 tracking-[0.1em] uppercase">{cardStack.length} left · {connectCount} connected</p>
+                  </>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center gap-4 py-20">
+                    <div className="text-4xl">🎉</div>
+                    <h2 className="text-xl font-bold tracking-tight">All caught up</h2>
+                    <p className="text-sm text-white/40">Try adjusting your filters or check back soon.</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {builderTab === "Events" && (
+              <div className="flex flex-col gap-4 pb-4">
+                {EVENTS.map((event) => (
+                  <EventCard key={event.id} event={event} joined={joinedEvents.has(event.id)}
+                    onJoin={() => setJoinedEvents((prev) => new Set([...prev, event.id]))} />
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── Business view ── */}
+      {effectiveRole === "business" && (
+        <div className="flex-1 flex flex-col px-5 pt-2">
+          {businessView === "home" && (
+            <>
+              <h1 className="text-2xl font-bold tracking-tight mb-1">Dashboard</h1>
+              <p className="text-sm text-white/40 mb-6">Post projects and run events for the BAD1 community.</p>
+
+              <div className="flex flex-col gap-3 mb-8">
+                <button onClick={() => setBusinessView("post-project")}
+                  className="flex items-center gap-4 border border-white/10 rounded-2xl px-4 py-4 hover:border-white/25 transition-colors text-left">
+                  <div className="w-10 h-10 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-xl">📋</div>
+                  <div>
+                    <p className="font-semibold text-sm text-white">Post a project</p>
+                    <p className="text-xs text-white/40 mt-0.5">Builders browse and apply</p>
+                  </div>
+                  <span className="ml-auto text-white/20 text-xs">›</span>
+                </button>
+                <button onClick={() => setBusinessView("create-event")}
+                  className="flex items-center gap-4 border border-white/10 rounded-2xl px-4 py-4 hover:border-white/25 transition-colors text-left">
+                  <div className="w-10 h-10 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-xl">⚡</div>
+                  <div>
+                    <p className="font-semibold text-sm text-white">Create an event</p>
+                    <p className="text-xs text-white/40 mt-0.5">Hackathons, workshops, meetups</p>
+                  </div>
+                  <span className="ml-auto text-white/20 text-xs">›</span>
+                </button>
+              </div>
+
+              {/* Active projects */}
+              <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-3">Your projects</p>
+              {[...MOCK_PROJECTS, ...postedProjects].length === 0 ? (
+                <p className="text-sm text-white/30">No projects yet.</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {[...MOCK_PROJECTS, ...postedProjects].map((p) => <ProjectCard key={p.id} project={p} />)}
+                </div>
+              )}
+            </>
+          )}
+
+          {businessView === "post-project" && (
+            <PostProjectForm onDone={() => setBusinessView("home")} />
+          )}
+
+          {businessView === "create-event" && (
+            <CreateEventForm onDone={() => setBusinessView("home")} />
+          )}
+        </div>
+      )}
 
       <BottomNav />
     </main>

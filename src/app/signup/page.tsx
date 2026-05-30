@@ -4,249 +4,232 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-const ROLES = [
-  {
-    id: "builder",
-    icon: "🛠️",
-    title: "Builder",
-    desc: "Find a co-founder, join or post projects, and connect at events.",
-    features: ["Co-founder matching", "Projects", "Events"],
-  },
-  {
-    id: "startup",
-    icon: "🚀",
-    title: "Startup",
-    desc: "Post projects, hire talent, and find participants for your events.",
-    features: ["Post projects", "Find talent", "Event recruiting"],
-  },
+const CATEGORIES = [
+  { id: "ai",        label: "AI" },
+  { id: "healthtech",label: "HealthTech" },
+  { id: "spacetech", label: "SpaceTech" },
+  { id: "climatetech",label: "ClimateTech" },
+  { id: "fintech",   label: "FinTech" },
+  { id: "biotech",   label: "Biotech" },
+  { id: "hardware",  label: "Hardware" },
+  { id: "edtech",    label: "EdTech" },
+  { id: "web3",      label: "Web3" },
+  { id: "other",     label: "Other" },
 ];
+
+type Role = "builder" | "business";
+type Step = "role" | "info" | "idea" | "categories";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState<string | null>(null);
-  const [name, setName] = useState("");
+  const [step, setStep] = useState<Step>("role");
+  const [role, setRole] = useState<Role | null>(null);
+
+  // Builder fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [hasIdea, setHasIdea] = useState<boolean | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  // Business fields
+  const [companyName, setCompanyName] = useState("");
+
+  // Shared
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [step, setStep] = useState<"roles" | "account">("roles");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function toggleRole(id: string) {
-    setSelected((prev) => (prev === id ? null : id));
-  }
-
-  async function handleLinkedIn() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "linkedin_oidc",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: "openid profile email",
-        queryParams: {
-          roles: selected ?? "",
-        },
-      },
-    });
-    if (error) setError(error.message);
+  function toggleCategory(id: string) {
+    setCategories((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
   }
 
   async function handleSignup() {
-    if (!email || !password) return;
     setLoading(true);
     setError(null);
+
+    const metadata =
+      role === "builder"
+        ? { full_name: `${firstName.trim()} ${lastName.trim()}`, role: "builder", has_idea: hasIdea, categories }
+        : { full_name: companyName.trim(), role: "business", company_name: companyName.trim() };
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: name.trim(), role: selected },
-      },
+      options: { data: metadata },
     });
 
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    if (data.user) {
-      router.push("/discover");
-    }
+    if (signUpError) { setError(signUpError.message); setLoading(false); return; }
+    if (data.user) router.push("/discover");
   }
 
-  return (
-    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-start py-10 px-4">
-      {/* Phone frame */}
-      <div className="w-full max-w-[390px] flex flex-col gap-0">
+  // ── Step: Role ────────────────────────────────────────────────────────────
+  if (step === "role") return (
+    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center py-10 px-4">
+      <div className="w-full max-w-[390px] flex flex-col">
+        <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/90 mb-12">Scout</div>
+        <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-2">What player are you?</h1>
+        <p className="text-[22px] text-white/25 mb-8">In the BAD1 ecosystem</p>
 
-        {/* Wordmark */}
-        <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/90 mb-12 px-1">
-          Scout
+        <div className="flex flex-col gap-3 mb-8">
+          {[
+            { id: "builder" as Role, icon: "🛠️", title: "Builder", desc: "Find a co-founder, join projects, and connect at events.", features: ["Co-founder matching", "Browse projects", "Events"] },
+            { id: "business" as Role, icon: "🏢", title: "Business", desc: "Post projects, run events, and tap into Berlin's builder network.", features: ["Post projects", "Create events"] },
+          ].map((r) => {
+            const active = role === r.id;
+            return (
+              <button key={r.id} onClick={() => setRole(r.id)}
+                className={`w-full text-left border rounded-2xl p-4 flex items-start gap-[14px] relative transition-all ${active ? "border-white/60 bg-white/5" : "border-white/10 hover:border-white/25"}`}>
+                <div className="w-9 h-9 rounded-[10px] bg-white/7 border border-white/10 flex items-center justify-center text-lg flex-shrink-0 mt-0.5">{r.icon}</div>
+                <div className="flex-1 pr-6">
+                  <div className="text-[15px] font-semibold text-white mb-1">{r.title}</div>
+                  <div className="text-xs text-white/40 leading-relaxed mb-2">{r.desc}</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {r.features.map((f) => (
+                      <span key={f} className="text-[10px] text-white/50 border border-white/10 rounded-full px-2 py-0.5">{f}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className={`absolute top-4 right-4 w-5 h-5 rounded-full border flex items-center justify-center text-[11px] transition-all ${active ? "bg-white border-white text-[#0a0a0a]" : "border-white/20 text-transparent"}`}>✓</div>
+              </button>
+            );
+          })}
         </div>
 
-        {step === "roles" ? (
-          <>
-            <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-1">
-              What player are you?
-            </h1>
-            <p className="text-[22px] text-white/25 leading-relaxed mb-2">
-              In the BAD1 ecosystem
-            </p>
-            <p className="text-[11px] tracking-[0.12em] uppercase text-white/25 mb-7">
-              Select all that apply
-            </p>
+        <button onClick={() => role && setStep("info")} disabled={!role}
+          className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] disabled:opacity-30 hover:opacity-90 transition-opacity">
+          Continue →
+        </button>
+        <p className="text-center text-sm text-white/35 mt-4">
+          Already have an account?{" "}
+          <a href="/login" className="text-white/70 hover:text-white transition-colors">Sign in</a>
+        </p>
+      </div>
+    </main>
+  );
 
-            <div className="flex flex-col gap-[10px] mb-8">
-              {ROLES.map((role) => {
-                const isSelected = selected === role.id;
-                return (
-                  <button
-                    key={role.id}
-                    onClick={() => toggleRole(role.id)}
-                    className={`w-full text-left border rounded-2xl p-4 flex items-start gap-[14px] relative transition-all duration-150 ${
-                      isSelected
-                        ? "border-white/60 bg-white/5"
-                        : "border-white/10 hover:border-white/25 hover:bg-white/[0.02]"
-                    }`}
-                  >
-                    {/* Icon */}
-                    <div className="w-9 h-9 rounded-[10px] bg-white/7 border border-white/10 flex items-center justify-center text-lg flex-shrink-0 mt-0.5">
-                      {role.icon}
-                    </div>
+  // ── Step: Info ────────────────────────────────────────────────────────────
+  if (step === "info") return (
+    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center py-10 px-4">
+      <div className="w-full max-w-[390px] flex flex-col">
+        <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/90 mb-12">Scout</div>
+        <button onClick={() => setStep("role")} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 mb-8 text-left">← Back</button>
 
-                    {/* Info */}
-                    <div className="flex-1 pr-7">
-                      <div className="text-[15px] font-semibold text-white mb-1">
-                        {role.title}
-                      </div>
-                      <div className="text-xs text-white/40 leading-relaxed">
-                        {role.desc}
-                      </div>
-                      <div className="flex flex-wrap gap-[5px] mt-[10px]">
-                        {role.features.map((f) => (
-                          <span
-                            key={f}
-                            className="text-[10px] tracking-[0.08em] text-white/50 border border-white/10 rounded-full px-2 py-0.5"
-                          >
-                            {f}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+        <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-8">
+          {role === "builder" ? "Tell us about yourself" : "Your business"}
+        </h1>
 
-                    {/* Checkbox */}
-                    <div
-                      className={`absolute top-[14px] right-4 w-5 h-5 rounded-full border flex items-center justify-center text-[11px] transition-all duration-150 ${
-                        isSelected
-                          ? "bg-white border-white text-[#0a0a0a]"
-                          : "border-white/20 text-transparent"
-                      }`}
-                    >
-                      ✓
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+        <div className="flex flex-col gap-3 mb-6">
+          {role === "builder" ? (
+            <>
+              <div className="flex gap-3">
+                <input type="text" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+                <input type="text" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)}
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+              </div>
+            </>
+          ) : (
+            <input type="text" placeholder="Company name" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+          )}
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
+        </div>
 
-            <div className="h-px bg-white/6 mb-6" />
+        {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
+        <div className="h-px bg-white/6 mb-6" />
 
-            <button
-              onClick={() => setStep("account")}
-              disabled={selected === null}
-              className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] transition-opacity disabled:opacity-30 hover:opacity-90"
-            >
-              Continue →
-            </button>
-
-            <p className="text-center text-sm text-white/35 mt-4">
-              Already have an account?{" "}
-              <a href="/login" className="text-white/70 hover:text-white transition-colors">
-                Sign in
-              </a>
-            </p>
-          </>
+        {role === "builder" ? (
+          <button
+            onClick={() => { if (firstName && lastName && email && password) setStep("idea"); }}
+            disabled={!firstName || !lastName || !email || !password}
+            className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] disabled:opacity-30 hover:opacity-90 transition-opacity">
+            Continue →
+          </button>
         ) : (
-          <>
-            <button
-              onClick={() => setStep("roles")}
-              className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 transition-colors mb-10 text-left"
-            >
-              ← Back
-            </button>
-
-            <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-3">
-              Create your<br />account
-            </h1>
-            <p className="text-[15px] text-white/45 leading-relaxed mb-8">
-              You&apos;re joining as:{" "}
-              <span className="text-white/70">
-                {ROLES.find((r) => r.id === selected)?.title}
-              </span>
-            </p>
-
-            {/* LinkedIn */}
-            <button
-              onClick={handleLinkedIn}
-              className="w-full flex items-center justify-center gap-3 bg-[#0A66C2] hover:bg-[#0958a8] text-white rounded-full py-[14px] text-sm font-semibold tracking-[0.03em] transition-colors mb-4"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              Continue with LinkedIn
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-white/8" />
-              <span className="text-xs text-white/25 tracking-[0.1em] uppercase">or</span>
-              <div className="flex-1 h-px bg-white/8" />
-            </div>
-
-            <div className="flex flex-col gap-3 mb-8">
-              <input
-                type="text"
-                placeholder="Your name or company"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors"
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors"
-              />
-            </div>
-
-            {error && (
-              <p className="text-sm text-red-400 mb-4">{error}</p>
-            )}
-
-            <div className="h-px bg-white/6 mb-6" />
-
-            <button
-              onClick={handleSignup}
-              disabled={!name.trim() || !email || !password || loading}
-              className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] transition-opacity disabled:opacity-30 hover:opacity-90"
-            >
-              {loading ? "Creating account…" : "Create account →"}
-            </button>
-
-            <p className="text-center text-sm text-white/35 mt-4">
-              Already have an account?{" "}
-              <a href="/login" className="text-white/70 hover:text-white transition-colors">
-                Sign in
-              </a>
-            </p>
-          </>
+          <button onClick={handleSignup} disabled={!companyName || !email || !password || loading}
+            className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] disabled:opacity-30 hover:opacity-90 transition-opacity">
+            {loading ? "Creating account…" : "Create account →"}
+          </button>
         )}
+      </div>
+    </main>
+  );
+
+  // ── Step: Idea ────────────────────────────────────────────────────────────
+  if (step === "idea") return (
+    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center py-10 px-4">
+      <div className="w-full max-w-[390px] flex flex-col">
+        <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/90 mb-12">Scout</div>
+        <button onClick={() => setStep("info")} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 mb-8 text-left">← Back</button>
+
+        <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-3">Do you have an idea?</h1>
+        <p className="text-[15px] text-white/40 mb-8">This helps us match you with the right people.</p>
+
+        <div className="flex flex-col gap-3 mb-8">
+          {[
+            { val: true,  icon: "💡", title: "Yes, I have an idea", desc: "You're working on something and need the right co-founder." },
+            { val: false, icon: "🔍", title: "No, I'm looking for one", desc: "You have the skills and drive — find a project worth building." },
+          ].map((opt) => {
+            const active = hasIdea === opt.val;
+            return (
+              <button key={String(opt.val)} onClick={() => setHasIdea(opt.val)}
+                className={`w-full text-left border rounded-2xl p-4 flex items-start gap-4 relative transition-all ${active ? "border-white/60 bg-white/5" : "border-white/10 hover:border-white/25"}`}>
+                <div className="w-9 h-9 rounded-[10px] bg-white/7 border border-white/10 flex items-center justify-center text-lg flex-shrink-0">{opt.icon}</div>
+                <div className="flex-1 pr-6">
+                  <div className="text-[15px] font-semibold text-white mb-0.5">{opt.title}</div>
+                  <div className="text-xs text-white/40 leading-relaxed">{opt.desc}</div>
+                </div>
+                <div className={`absolute top-4 right-4 w-5 h-5 rounded-full border flex items-center justify-center text-[11px] transition-all ${active ? "bg-white border-white text-[#0a0a0a]" : "border-white/20 text-transparent"}`}>✓</div>
+              </button>
+            );
+          })}
+        </div>
+
+        <button onClick={() => hasIdea !== null && setStep("categories")} disabled={hasIdea === null}
+          className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] disabled:opacity-30 hover:opacity-90 transition-opacity">
+          Continue →
+        </button>
+      </div>
+    </main>
+  );
+
+  // ── Step: Categories ──────────────────────────────────────────────────────
+  return (
+    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center py-10 px-4">
+      <div className="w-full max-w-[390px] flex flex-col">
+        <div className="text-xs font-bold tracking-[0.25em] uppercase text-white/90 mb-12">Scout</div>
+        <button onClick={() => setStep("idea")} className="text-xs tracking-[0.15em] uppercase text-white/35 hover:text-white/60 mb-8 text-left">← Back</button>
+
+        <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-2">
+          {hasIdea ? "What's your idea about?" : "What are you interested in?"}
+        </h1>
+        <p className="text-[15px] text-white/40 mb-8">Select all that apply.</p>
+
+        <div className="flex flex-wrap gap-2 mb-10">
+          {CATEGORIES.map((cat) => {
+            const active = categories.includes(cat.id);
+            return (
+              <button key={cat.id} onClick={() => toggleCategory(cat.id)}
+                className={`text-sm px-4 py-2 rounded-full border transition-colors ${active ? "border-white/60 bg-white/10 text-white" : "border-white/15 text-white/50 hover:border-white/30 hover:text-white/80"}`}>
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
+        <div className="h-px bg-white/6 mb-6" />
+
+        <button onClick={handleSignup} disabled={categories.length === 0 || loading}
+          className="w-full bg-white text-[#0a0a0a] rounded-full py-[15px] text-sm font-semibold tracking-[0.05em] disabled:opacity-30 hover:opacity-90 transition-opacity">
+          {loading ? "Creating account…" : "Enter Scout →"}
+        </button>
       </div>
     </main>
   );
