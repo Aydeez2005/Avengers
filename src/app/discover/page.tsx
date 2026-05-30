@@ -19,23 +19,19 @@ export type EventData = {
   attendees: number;
 };
 
-type RoleKey = "founder" | "builder" | "researcher" | "startup" | "corporate";
+type RoleKey = "founder" | "startup" | "corporate";
 type Tab = "Co-founders" | "Events" | "Projects" | "Find Talent";
 
 const ROLE_TABS: Record<RoleKey, Tab[]> = {
-  founder:    ["Co-founders", "Events"],
-  builder:    ["Co-founders", "Projects", "Events"],
-  researcher: ["Co-founders", "Events"],
-  startup:    ["Find Talent", "Events"],
-  corporate:  ["Find Talent", "Events"],
+  founder:   ["Co-founders", "Projects", "Events"],
+  startup:   ["Find Talent", "Events"],
+  corporate: ["Find Talent", "Events"],
 };
 
 const ROLE_LABELS: Record<RoleKey, string> = {
-  founder:    "Founder",
-  builder:    "Builder",
-  researcher: "Researcher",
-  startup:    "Startup",
-  corporate:  "Corporate",
+  founder:   "Founder",
+  startup:   "Startup",
+  corporate: "Corporate",
 };
 
 // ── Mock data ──────────────────────────────────────────────────────────────

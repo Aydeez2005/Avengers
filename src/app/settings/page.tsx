@@ -48,8 +48,6 @@ export default function SettingsPage() {
 
   const roleLabels: Record<string, string> = {
     founder: "Founder",
-    builder: "Builder",
-    researcher: "Researcher",
     startup: "Startup",
     corporate: "Corporate",
   };
