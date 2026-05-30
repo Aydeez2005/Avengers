@@ -861,7 +861,8 @@ export default function DiscoverPage() {
             )}
 
             {builderTab === "Projects" && (
-              <div className="flex flex-col gap-4 pb-4 overflow-y-auto">
+              <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="flex flex-col gap-4 pb-4">
                 {(dbProjects.length > 0 ? dbProjects : MOCK_PROJECTS).map((p) => (
                   <ProjectCard key={p.id} project={p}
                     applied={appliedProjects.has(String(p.id))}
@@ -878,10 +879,12 @@ export default function DiscoverPage() {
                   />
                 ))}
               </div>
+              </div>
             )}
 
             {builderTab === "Events" && (
-              <div className="flex flex-col gap-4 pb-4 overflow-y-auto">
+              <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="flex flex-col gap-4 pb-4">
                 {(dbEvents.length > 0 ? dbEvents : EVENTS).map((event) => (
                   <EventCard key={event.id} event={event} joined={joinedEvents.has(String(event.id))}
                     onJoin={async () => {
@@ -898,6 +901,7 @@ export default function DiscoverPage() {
                       setJoinedEvents((prev) => new Set([...prev, id]));
                     }} />
                 ))}
+              </div>
               </div>
             )}
           </div>
