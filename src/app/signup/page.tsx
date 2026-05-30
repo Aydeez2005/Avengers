@@ -15,6 +15,7 @@ export default function SignupPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
+  const [businessUrl, setBusinessUrl] = useState("");
 
   function toggleRole(id: string) {
     setSelected((prev) =>
@@ -31,6 +32,7 @@ export default function SignupPage() {
     if (typeof window !== "undefined") {
       localStorage.setItem("scout_name", name.trim());
       localStorage.setItem("scout_roles", JSON.stringify(selected));
+      if (businessUrl.trim()) localStorage.setItem("scout_business_url", businessUrl.trim());
     }
     router.push("/discover");
   }
@@ -84,11 +86,21 @@ export default function SignupPage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleEnter()}
+            onKeyDown={(e) => e.key === "Enter" && !selected.includes("startup") && handleEnter()}
             placeholder="Your name or company"
             autoFocus
             className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 text-white placeholder-white/25 text-base outline-none focus:border-white/40 transition-colors mb-4"
           />
+          {selected.includes("startup") && (
+            <input
+              type="url"
+              value={businessUrl}
+              onChange={(e) => setBusinessUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleEnter()}
+              placeholder="Website or LinkedIn (optional)"
+              className="w-full bg-white/[0.04] border border-white/15 rounded-2xl px-5 py-4 text-white placeholder-white/25 text-base outline-none focus:border-white/40 transition-colors mb-4"
+            />
+          )}
 
           <button
             onClick={handleEnter}

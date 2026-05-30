@@ -309,7 +309,7 @@ function PostProjectForm({ onDone }: { onDone: () => void }) {
 
       <input type="text" placeholder="Project name" value={name} onChange={(e) => setName(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
-      <input type="text" placeholder="Short description" value={description} onChange={(e) => setDescription(e.target.value)}
+      <input type="text" placeholder="Describe a real problem, set a budget, and let BAD1 builders propose solutions" value={description} onChange={(e) => setDescription(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
       <input type="text" placeholder="People required (e.g. 2)" value={people} onChange={(e) => setPeople(e.target.value)}
         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-[14px] text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 transition-colors" />
