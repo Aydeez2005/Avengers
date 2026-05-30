@@ -17,3 +17,6 @@ body {
   color: #ffffff;
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
 }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
